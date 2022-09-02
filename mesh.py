@@ -20,19 +20,13 @@ class Mesh():
     def NumofSubIntervals(self):
         return self.N
     def mesh_points(self):
-        return np.linspace(self.a, self.b, self.N+1)
+        return np.linspace(self.a, self.b, self.N+2)
     def silengths(self):
-        silengths=self.mesh_points()[1:]-self.mesh_points()[:self.N]
+        silengths=self.mesh_points()[1:]-self.mesh_points()[:self.N+1]
         return silengths
     def midpoints(self):
-        return (self.mesh_points()[:self.N]+self.mesh_points()[1:])/2
-    def cvlengths(self):
-        cvlengths=np.zeros(self.N+1)
-        cvlengths[0]=self.midpoints()[0]-self.a
-        cvlengths[self.N]=self.b-self.midpoints()[self.N-1]
-        cvlengths[1:self.N]=self.midpoints()[1:]-self.midpoints()[:self.N-1]
-        return cvlengths
+        return (self.mesh_points()[:self.N+1]+self.mesh_points()[1:])/2
 
 
 domain=Mesh(0,4,5)
-print(f"Number of subintervals: {domain.NumofSubIntervals()}\nmesh_points:{domain.mesh_points()}\nsilengths:{len(domain.silengths())}\nmidpoints:{len(domain.midpoints())}\ncvlengths:{domain.cvlengths()}")
+print(f"Number of subintervals: {domain.NumofSubIntervals()}\nmesh_points:{domain.mesh_points()}\nsilengths:{len(domain.silengths())}\nmidpoints:{len(domain.midpoints())}")
