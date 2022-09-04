@@ -45,7 +45,7 @@ class StiffMatrix(Mesh):
         return BR
     def B(self):
         B=np.ones(self.N,self.N)
-        B=(1/(gamma(self.beta)*self.h[0]))*(np.matmul(np.diag(self.construct_coeff()[0],k=0),self.BL)+np.matmul(np.diag(self.construct_coeff()[1]),self.BR))
+        B[:]=(1/(gamma(self.beta)*self.h[0]))*(np.matmul(np.diag(self.construct_coeff()[0],k=0),self.BL()[:])+np.matmul(np.diag(self.construct_coeff()[1]),self.BR()[:]))
         return B
 
 
