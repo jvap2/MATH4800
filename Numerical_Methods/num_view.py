@@ -18,7 +18,7 @@ class First_View():
         self.Frame.config(**self.gray_bg)
         self.Frame.grid()
         self.Mesh=tk.Frame(self.Frame)
-        self.Mesh.config(**self.purple_fg)
+        self.Mesh.config(**self.gray_bg)
         self.Mesh_Label=tk.Label(self.Mesh, text="Input domain and Number of SubIntervals",
         **self.font_large, **self.pad_med, **self.gray_bg)
         self.Mesh_Label.grid(row=0)
