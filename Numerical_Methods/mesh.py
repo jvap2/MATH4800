@@ -33,5 +33,5 @@ class Mesh():
         return np.linspace(self.t_0, self.t_m,self.m+1)
 
 
-domain=Mesh(0,4,5)
+domain=Mesh(0,4,5,0,2,10)
 print(f"Number of subintervals: {domain.NumofSubIntervals()}\nmesh_points:{domain.mesh_points()}\nsilengths:{len(domain.silengths())}\nmidpoints:{len(domain.midpoints())}")
