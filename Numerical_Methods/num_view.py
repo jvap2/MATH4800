@@ -24,7 +24,7 @@ class First_View():
         self.B_label.pack()
         self.input_B=ttk.Entry(self.Mesh,textvariable=self.B)
         self.input_B.pack()
-        self.N_label=ttk.Label(self.Mesh, text="x_0", style="BW.TLabel")
+        self.N_label=ttk.Label(self.Mesh, text="N", style="BW.TLabel")
         self.N_label.pack()
         self.input_N=ttk.Entry(self.Mesh,textvariable=self.N)
         self.input_N.pack()

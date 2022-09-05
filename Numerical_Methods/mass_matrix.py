@@ -6,8 +6,8 @@ class MassMatrix(Mesh):
     Class for construction of Mass Matrix
     Inherites the attributes of the Mesh class
     '''
-    def __init__(self,a,b,N):
-        super().__init__(a,b,N)
+    def __init__(self,a,b,N,t_0,t_m,M):
+        super().__init__(a,b,N,t_0,t_m,M)
     def Construct(self):
         x=self.mesh_points()
         mid=self.midpoints()
@@ -21,6 +21,3 @@ class MassMatrix(Mesh):
         upper_diag[:]=(1/(2*h[1:self.N]))*(mid[1:self.N]**2-2*x[1:self.N]*mid[1:self.N]+x[1:self.N]**2)
         M=np.diag(middle_diag, k=0)+np.diag(upper_diag,k=1)+np.diag(lower_diag,k=-1)
         return M
-
-m=MassMatrix(0,4,5)
-print(m.Construct())
