@@ -1,33 +1,30 @@
 import tkinter as tk
+from tkinter import ttk
+
 
 class First_View():
     def __init__(self, Master):
-        self.pad_small={"padx":6, "pady":6}
-        self.pad_med={"padx":12, "pady": 12}
-        self.pad_frame={"padx":45, "pady":45}
-        self.font_small={"font":8}
-        self.font_med={"font":12}
-        self.font_large={"font":20}
-        self.purple_fg={"fg":"MediumPurple3"}
-        self.blue_bg={"bg":"midnight blue"}
-        self.widget_blue={"highlightbackgroud":"midnight blue"}
-        self.gray_bg={"bg":"gray17"}
-        self.Option_menu_thick={"highlightthickness": 0}
-        self.Label_font={"fg": "NavajoWhite2"}
-        self.Frame=tk.Frame(Master)
-        self.Frame.config(**self.gray_bg)
-        self.Frame.grid()
-        self.Mesh=tk.Frame(self.Frame)
-        self.Mesh.config(**self.gray_bg)
-        self.Mesh_Label=tk.Label(self.Mesh, text="Input domain and Number of SubIntervals",
-        **self.font_large, **self.pad_med, **self.gray_bg)
-        self.Mesh_Label.grid(row=0)
+        self.Frame=ttk.Frame(Master, padding=20)
+        self.Frame.pack()
+        self.style = ttk.Style()
+        self.style.configure("BW.TLabel", foreground="black", background="white")
+        self.Mesh=ttk.Frame(self.Frame, padding=10)
+        self.Mesh.pack()
+        self.Mesh_Label=ttk.Label(self.Mesh, text="Input domain and Number of SubIntervals", style="BW.TLabel")
+        self.Mesh_Label.grid(row=0, column=0)
+        self.Mesh_Label.pack()
         self.A=tk.StringVar(self.Frame)
         self.B=tk.StringVar(self.Frame)
         self.N=tk.StringVar(self.Frame)
-        self.A_label=tk.Label(self.Mesh, text="x_0", **self.font_med, **self.pad_med, **self.gray_bg)
-        self.input_A=tk.Entry(self.Mesh,textvariable=self.A)
-        self.B_label=tk.Label(self.Mesh, text="x_N", **self.font_med, **self.pad_med, **self.gray_bg)
-        self.input_B=tk.Entry(self.Mesh,textvariable=self.B)
-        self.N_label=tk.Label(self.Mesh, text="x_0", **self.font_med, **self.pad_med, **self.gray_bg)
-        self.input_N=tk.Entry(self.Mesh,textvariable=self.N)
+        self.A_label=ttk.Label(self.Mesh, text="x_0", style="BW.TLabel")
+        self.A_label.pack()
+        self.input_A=ttk.Entry(self.Mesh,textvariable=self.A)
+        self.input_A.pack()
+        self.B_label=ttk.Label(self.Mesh, text="x_N", style="BW.TLabel")
+        self.B_label.pack()
+        self.input_B=ttk.Entry(self.Mesh,textvariable=self.B)
+        self.input_B.pack()
+        self.N_label=ttk.Label(self.Mesh, text="x_0", style="BW.TLabel")
+        self.N_label.pack()
+        self.input_N=ttk.Entry(self.Mesh,textvariable=self.N)
+        self.input_N.pack()
