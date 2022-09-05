@@ -1,17 +1,17 @@
+from cgitb import text
 import tkinter as tk
 from tkinter import ttk
 
 
 class First_View():
     def __init__(self, Master):
-        self.Frame=ttk.Frame(Master, padding=20)
+        self.Frame=ttk.Frame(Master, padding=40)
         self.Frame.pack()
         self.style = ttk.Style()
         self.style.configure("BW.TLabel", foreground="black", background="white")
-        self.Mesh=ttk.Frame(self.Frame, padding=10)
+        self.Mesh=ttk.Frame(self.Frame, padding=20, style="BW.TLabel")
         self.Mesh.pack()
-        self.Mesh_Label=ttk.Label(self.Mesh, text="Input domain and Number of SubIntervals", style="BW.TLabel")
-        self.Mesh_Label.grid(row=0, column=0)
+        self.Mesh_Label=ttk.Label(self.Mesh, text="Input domain and Num of SubIntervals", style="BW.TLabel")
         self.Mesh_Label.pack()
         self.A=tk.StringVar(self.Frame)
         self.B=tk.StringVar(self.Frame)
@@ -28,3 +28,17 @@ class First_View():
         self.N_label.pack()
         self.input_N=ttk.Entry(self.Mesh,textvariable=self.N)
         self.input_N.pack()
+        self.Time_Label=ttk.Label(self.Mesh, text="Input time domain and Num of SubIntervals", style="BW.TLabel")
+        self.Time_Label.pack()
+        self.tzero=tk.StringVar(self.Frame)
+        self.tM=tk.StringVar(self.Frame)
+        self.M=tk.StringVar(self.Frame)
+        self.tzLabel=ttk.Label(self.Mesh, text="t_0", style="BW.TLabel")
+        self.tzLabel.pack()
+        self.input_tz=ttk.Entry(self.Mesh, textvariable=self.tzero).pack()
+        self.tmLabel=ttk.Label(self.Mesh, text="t_m", style="BW.TLabel").pack()
+        self.input_tm=ttk.Entry(self.Mesh, textvariable=self.tM).pack()
+        self.MLabel=ttk.Label(self.Mesh, text='M', style="BW.TLabel").pack()
+        self.input_m=ttk.Entry(self.Mesh, textvariable=self.M).pack()
+        self.mesh_button=tk.Button(self.Mesh, text="Enter")
+        self.mesh_button.pack()
