@@ -18,18 +18,17 @@ class Controller():
     def run(self):
         self.root.mainloop()
     def make_mesh(self, event):
-        try:
-            a=float(self.view.A.get())
-            b=float(self.view.B.get())
-            N=int(self.view.N.get())
-            t_0=float(self.view.tzero.get())
-            t_m=float(self.view.tM.get())
-            M=int(self.view.M.get())
-            gamma=float(self.view.gamma.get())
-            beta=float(self.view.beta.get())
-            omega=float(self.view.omega.get())
-            sol=Final_Solution(a,b,N,t_0,t_m,M,gamma,beta,omega)
-        except:
-            print("Improper inputs")
+        a=float(self.view.A.get())
+        b=float(self.view.B.get())
+        N=int(self.view.N.get())
+        t_0=float(self.view.tzero.get())
+        t_m=float(self.view.tM.get())
+        M=int(self.view.M.get())
+        gamma=float(self.view.gamma.get())
+        beta=float(self.view.beta.get())
+        theta=float(self.view.theta.get())
+        sol=Final_Solution(a,b,N,t_0,t_m,M,gamma,beta,theta)
+        u=sol.CGS()
+        print(u)
 
         
