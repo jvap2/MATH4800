@@ -20,7 +20,7 @@ class Final_Solution():
         return np.exp((x-1)**2/(2*.08**2))
     def CGS(self):
         u_0=self.u_zero(self.mesh.mesh_points()[1:self.N+1])
-        u=np.zeros((self.N,self.M))
+        u=np.zeros((self.N,self.M+1))
         u[:,0]=u_0
         for (i,t) in enumerate(self.mesh.time()[1:]):
             u_init=u[:,i]
@@ -28,8 +28,9 @@ class Final_Solution():
             A=csc_matrix(self.mass.Construct()-(self.theta)*self.mesh.delta_t()*self.stiff.B(t))
             x,exit_code=scipy.sparse.linalg.cgs(A,b)
             if exit_code !=0:
+                print("Failed convergence")
                 break
             else:
-                u[i+1,:]=x
+                u[:,i+1]=x
         return u
 

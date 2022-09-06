@@ -6,6 +6,9 @@ from mesh import Mesh
 from mass_matrix import MassMatrix
 from stiff_matrix import StiffMatrix
 from solve import Final_Solution
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
 
 
 class Controller():
@@ -27,8 +30,17 @@ class Controller():
         gamma=float(self.view.gamma.get())
         beta=float(self.view.beta.get())
         theta=float(self.view.theta.get())
+        mesh=Mesh(a,b,N,t_0,t_m,M)
         sol=Final_Solution(a,b,N,t_0,t_m,M,gamma,beta,theta)
-        u=sol.CGS()
-        print(u)
+        u=np.zeros((mesh.NumofSubIntervals()+2,M+1))
+        u[1:mesh.NumofSubIntervals()+1,:]=sol.CGS()
+        x,t=np.meshgrid(mesh.mesh_points(),mesh.time())
+        print(np.shape(x),np.shape(t))
+        fig=plt.figure()
+        ax=plt.axes(projection='3d')
+        ax.plot_surface(x,t,np.transpose(u),cmap="plasma")
+        ax.set_xlabel('x')
+        ax.set_ylabel('t')
+        plt.show()
 
         

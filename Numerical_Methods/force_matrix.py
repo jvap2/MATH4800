@@ -7,6 +7,7 @@ import numpy as np
 class Force_Matrix():
     def __init__(self,a,b,N,t_0,t_m,M):
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
+        self.N=N
     def force_func(self,x,t):
         pass
     def Construct(self):
