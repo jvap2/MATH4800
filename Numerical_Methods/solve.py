@@ -12,4 +12,6 @@ class Final_Solution(MassMatrix,Force_Matrix,StiffMatrix):
     def CGS():
         u=lambda x,t: np.exp((x-1)**2/(2*.08**2))
         u_0=u(MassMatrix.mesh_points()[1:MassMatrix.NumofSubIntervals()+1],MassMatrix.time()[0])
-        
+        for t in MassMatrix.time():
+            pass
+
