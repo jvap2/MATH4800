@@ -1,17 +1,18 @@
 import numpy as np
 from mesh import Mesh
 
-class MassMatrix(Mesh):
+class MassMatrix():
     '''
     Class for construction of Mass Matrix
     Inherites the attributes of the Mesh class
     '''
     def __init__(self,a,b,N,t_0,t_m,M):
-        super().__init__(a,b,N,t_0,t_m,M)
+        self.mesh=Mesh(a,b,N,t_0,t_m,M)
+        self.N=self.mesh.NumofSubIntervals()
     def Construct(self):
-        x=self.mesh_points()
-        mid=self.midpoints()
-        h=self.silengths()
+        x=self.mesh.mesh_points()
+        mid=self.mesh.midpoints()
+        h=self.mesh.silengths()
         middle_diag=np.zeros(self.N)
         upper_diag=np.zeros(self.N-1)
         lower_diag=np.zeros(self.N-1)

@@ -31,6 +31,8 @@ class Mesh():
         return (self.mesh_points()[:self.N+1]+self.mesh_points()[1:])/2
     def time(self):
         return np.linspace(self.t_0, self.t_m,self.m+1)
+    def delta_t(self):
+        return (self.time()[1]-self.time()[0])
 
 
 domain=Mesh(0,4,5,0,2,10)

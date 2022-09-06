@@ -8,14 +8,15 @@ from mesh import Mesh
 
 
 
-class StiffMatrix(Mesh):
-    def __init__(self,a,b,N, gamma, beta):
-        super().__init__(a,b,N)
+class StiffMatrix():
+    def __init__(self,a,b,N,t_0,t_m,M,gamma,beta):
+        self.mesh=Mesh(a,b,N,t_0,t_m,M)
         self.gamma=gamma
         self.beta=beta
-        self.x=self.mesh_points()
-        self.mid=self.midpoints()
-        self.h=self.silengths()
+        self.N=self.mesh.NumofSubIntervals()
+        self.x=self.mesh.mesh_points()
+        self.mid=self.mesh.midpoints()
+        self.h=self.mesh.silengths()
     def BL(self):
         col=[(1-self.gamma)*(1.5**self.beta)-(2-self.gamma)*(.5)**self.beta, (1-self.gamma)*((.5**self.beta)+(2.5**self.beta)-2*(1.5)**self.beta), ((1-self.gamma)*((-i-.5)**self.beta+(-i+1.5)**self.beta-2*(-i+.5)**self.beta) for i in range(-2,-self.N-2,-1))]
         row=[(1-self.gamma)*(1.5**self.beta)-(2-self.gamma)*(.5)**self.beta, (1+self.gamma)*(.5**self.beta)-(self.gamma)*(1.5**self.beta), (self.gamma*(2*(i-.5)**self.beta-(i+.5)**self.beta-(i-1.5**self.beta)) for i in range(2,self.N))]

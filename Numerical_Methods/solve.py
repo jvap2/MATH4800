@@ -6,12 +6,20 @@ from mesh import Mesh
 import scipy
 import numpy as np
 
-class Final_Solution(MassMatrix,Force_Matrix,StiffMatrix):
-    def __init__(self,a,b,N,t_0,t_m,M,gamma,beta):
-        super().__init__(a,b,N,t_0,t_m,M,gamma,beta)
-    def CGS():
-        u=lambda x,t: np.exp((x-1)**2/(2*.08**2))
-        u_0=u(MassMatrix.mesh_points()[1:MassMatrix.NumofSubIntervals()+1],MassMatrix.time()[0])
-        for t in MassMatrix.time():
-            pass
+class Final_Solution():
+    def __init__(self,a,b,N,t_0,t_m,M,gamma,beta,omega):
+        self.mass=MassMatrix(a,b,N,t_0, t_m,M)
+        self.force=Force_Matrix(a,b,N,t_0,t_m,M)
+        self.stiff=StiffMatrix(a,b,N,t_0,t_m,M,gamma,beta)
+        self.omega=omega
+        self.N=N
+        self.M=M
+    def u_zero(self,x,t=0):
+        return np.exp((x-1)**2/(2*.08**2))
+    def CGS(self):
+        u_0=self.u_zero(MassMatrix.mesh_points()[1:MassMatrix.NumofSubIntervals()+1])
+        u=np.zeros((self.N,self.M))
+        u[:,0]=u_0
+        for (i,t) in enumerate(MassMatrix.time()[1:]):
+            u_init=u[:,i]
 
