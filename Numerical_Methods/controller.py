@@ -1,9 +1,11 @@
 import imp
+from typing import Final
 from num_view import First_View
 import tkinter as tk
 from mesh import Mesh
 from mass_matrix import MassMatrix
 from stiff_matrix import StiffMatrix
+from solve import Final_Solution
 
 
 class Controller():
@@ -22,11 +24,11 @@ class Controller():
             N=int(self.view.N.get())
             t_0=float(self.view.tzero.get())
             t_m=float(self.view.tM.get())
-            m=int(self.view.M.get())
+            M=int(self.view.M.get())
             gamma=float(self.view.gamma.get())
             beta=float(self.view.beta.get())
-            Mass_Mat=MassMatrix(a,b,N,t_0,t_m,m)
-            Mass_Mat.Construct()
+            omega=float(self.view.omega.get())
+            sol=Final_Solution(a,b,N,t_0,t_m,M,gamma,beta,omega)
         except:
             print("Improper inputs")
 
