@@ -23,6 +23,8 @@ class Controller():
             t_0=float(self.view.tzero.get())
             t_m=float(self.view.tM.get())
             m=int(self.view.M.get())
+            gamma=float(self.view.gamma.get())
+            beta=float(self.view.beta.get())
             Mass_Mat=MassMatrix(a,b,N,t_0,t_m,m)
             Mass_Mat.Construct()
         except:
