@@ -1,8 +1,8 @@
 from re import M
-from mass_matrix import MassMatrix
-from force_matrix import Force_Matrix
-from stiff_matrix import StiffMatrix
-from mesh import Mesh
+from d_mass_matrix import MassMatrix
+from d_force_matrix import Force_Matrix
+from d_stiff_matrix import StiffMatrix
+from d_mesh import Mesh
 import cupyx.scipy
 from cupyx.scipy.sparse import csc_matrix, linalg
 import cupy as cp

@@ -4,7 +4,7 @@ import cupyx.scipy
 from cupyx.scipy.linalg import toeplitz
 from cupyx.scipy.sparse import diags
 from math import gamma
-from mesh import Mesh
+from d_mesh import Mesh
 
 
 

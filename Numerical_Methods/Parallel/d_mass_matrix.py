@@ -1,5 +1,5 @@
 import cupy as cp
-from mesh import Mesh
+from d_mesh import Mesh
 
 class MassMatrix():
     '''

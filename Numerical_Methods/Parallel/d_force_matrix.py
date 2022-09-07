@@ -1,5 +1,5 @@
 import scipy
-from mesh import Mesh
+from d_mesh import Mesh
 from scipy import integrate
 import cupy as cp
 

@@ -1,11 +1,11 @@
 import imp
 from typing import Final
-from num_view import First_View
+from d_num_view import First_View
 import tkinter as tk
-from mesh import Mesh
-from mass_matrix import MassMatrix
-from stiff_matrix import StiffMatrix
-from solve import Final_Solution
+from d_mesh import Mesh
+from d_mass_matrix import MassMatrix
+from d_stiff_matrix import StiffMatrix
+from d_solve import Final_Solution
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
