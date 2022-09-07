@@ -1,7 +1,7 @@
 import scipy
 from mesh import Mesh
 from scipy import integrate
-import numpy as np
+import cupy as cp
 
 
 class Force_Matrix():
@@ -11,5 +11,5 @@ class Force_Matrix():
     def force_func(self,x,t):
         pass
     def Construct(self):
-        force=np.zeros(self.N)
+        force=cp.zeros(self.N)
         return force
