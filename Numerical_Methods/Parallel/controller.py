@@ -6,9 +6,10 @@ from mesh import Mesh
 from mass_matrix import MassMatrix
 from stiff_matrix import StiffMatrix
 from solve import Final_Solution
-import numpy as cp
+import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
+import cupy as cp
 
 
 class Controller():
@@ -33,14 +34,15 @@ class Controller():
         theta=float(self.view.theta.get())
         mesh=Mesh(a,b,N,t_0,t_m,M)
         sol=Final_Solution(a,b,N,t_0,t_m,M,gamma,beta,theta)
-        u=cp.zeros((mesh.NumofSubIntervals()+2,M+1))
-        u[1:mesh.NumofSubIntervals()+1,:]=sol.CGS().get()
-        x,t=cp.meshgrid(mesh.mesh_points(),mesh.time())
+        u=np.zeros((mesh.NumofSubIntervals()+2,M+1))
+        u[1:mesh.NumofSubIntervals()+1,:]=sol.CGS()
+        x,t=np.meshgrid(cp.asnumpy(mesh.mesh_points()),cp.asnumpy(mesh.time()))
         fig=plt.figure()
         ax=plt.axes(projection='3d')
-        ax.plot_surface(x,t,cp.transpose(u),cmap="plasma")
+        ax.plot_surface(x,t,np.transpose(u),cmap="plasma")
         ax.set_xlabel('x')
         ax.set_ylabel('t')
+        ax.set_title(f'Gaussian pulse with anomolous diffusion, \u03b2={beta},\u03b3={gamma},\u03b8={theta},N={N},M={M}')
         plt.show()
 
         

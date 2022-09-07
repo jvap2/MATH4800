@@ -7,6 +7,8 @@ import cupyx.scipy
 from cupyx.scipy.sparse import csc_matrix, linalg
 import cupy as cp
 
+
+
 class Final_Solution():
     def __init__(self,a,b,N,t_0,t_m,M,gamma,beta,theta):
         self.mass=MassMatrix(a,b,N,t_0, t_m,M)
@@ -17,7 +19,7 @@ class Final_Solution():
         self.N=N
         self.M=M
     def u_zero(self,x,t=0):
-        return cp.exp((x-1)**2/(2*.08**2))
+        return cp.exp(-(x-1)**2/(2*.08**2))
     def CGS(self):
         u_0=self.u_zero(self.mesh.mesh_points()[1:self.N+1])
         u=cp.zeros((self.N,self.M+1))
@@ -32,5 +34,5 @@ class Final_Solution():
                 break
             else:
                 u[:,i+1]=x
-        return u
+        return cp.asnumpy(u)
 
