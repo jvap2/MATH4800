@@ -39,10 +39,11 @@ class StiffMatrix():
         return BR
     def B(self,t):
         coeff=lambda x,t: .002*(1+x*(2-x)+t**2)
+        K_m_1=.01*cp.ones(self.N+1)
         K_m=cp.zeros(self.N+1)
         K_m=coeff(x=self.mid[0:self.N+1],t=t)
         B=cp.ones((self.N,self.N))
-        B[:]=(1/(gamma(self.beta)*self.h[0]))*(cp.matmul(cp.diag(K_m[1:],k=0),self.BL())+cp.matmul(cp.diag(K_m[:self.N],k=0),self.BR()))
+        B[:]=(1/(gamma(self.beta+1)*(self.h[0])**(1-self.beta)))*(cp.matmul(cp.diag(K_m_1[:self.N],k=0),self.BL())+cp.matmul(cp.diag(K_m_1[1:],k=0),self.BR()))
         return B
 
 
