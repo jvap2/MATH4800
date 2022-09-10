@@ -9,11 +9,8 @@ from cupyx.scipy.sparse import csc_matrix, linalg
 import cupy as cp
 from scipy.integrate import quad
 import numpy as np
-import scipy
 import math
-import torchquad
-from torchquad import Trapezoid
-import torch
+
 
 
 
@@ -41,10 +38,12 @@ class Final_Solution():
     def CGS(self):
         u_0=self.u_zero_1()
         u=cp.zeros((self.N,self.M+1))
-        u_true=cp.zeros((self.N+2,1))
         u[:,0]=u_0
         for (i,t) in enumerate(self.mesh.time()[1:]):
-            b=cp.matmul((self.mass.Construct()+(1-self.theta)*self.mesh.delta_t()*self.stiff.B(self.mesh.time()[i])),u[:,i])+self.mesh.delta_t()*self.force.Construct()
+            if i==0:
+                b=cp.matmul((self.mass.Construct_Prob_1()+(1-self.theta)*self.mesh.delta_t()*self.stiff.B(self.mesh.time()[i])),u[:,i])+self.mesh.delta_t()*self.force.Construct()
+            else:
+                b=cp.matmul((self.mass.Construct()+(1-self.theta)*self.mesh.delta_t()*self.stiff.B(self.mesh.time()[i])),u[:,i])+self.mesh.delta_t()*self.force.Construct()
             A=csc_matrix(self.mass.Construct()-(self.theta)*self.mesh.delta_t()*self.stiff.B(t))
             x,exit_code=linalg.cgs(A,b)
             if exit_code !=0:
@@ -54,14 +53,10 @@ class Final_Solution():
                 u[:,i+1]=x
             if(i%10==0):
                 print(f"Iterations:{i}")
-        for (i,x) in enumerate(self.mesh.mesh_points()):
-            u_true[i]=self.sol_1(x=x,t=1)
-        return cp.asnumpy(u),cp.asnumpy(u_true)
+        return cp.asnumpy(u)
     def MatInv(self):
         u_0=self.u_zero_1()
         u=cp.zeros((self.N,self.M+1))
-        u_true_final=cp.zeros((self.N+2,1))
-        u_true_mid=cp.zeros((self.N+2,1))
         u[:,0]=u_0
         for (i,t) in enumerate(self.mesh.time()[1:]):
             if i==0:
@@ -72,9 +67,13 @@ class Final_Solution():
             u[:,i+1]=cp.matmul(cp.linalg.inv(A),b)
             if(i%10==0):
                 print(f"Iterations:{i}")
+        return cp.asnumpy(u)
+    def True_Sol(self):
+        u_true_final=cp.zeros((self.N+2))
+        u_true_mid=cp.zeros((self.N+2))
         for (i,x) in enumerate(self.mesh.mesh_points()):
             u_true_final[i]=self.sol_1(x,t=1)
             u_true_mid[i]=self.sol_1(x,t=.5)
-        return cp.asnumpy(u),cp.asnumpy(u_true_final),cp.asnumpy(u_true_mid)
+        return cp.asnumpy(u_true_final),cp.asnumpy(u_true_mid)
 
 
