@@ -19,19 +19,26 @@ class B_mat():
         g[:]=gamma(k[:]-self.alpha)/(gamma(-self.alpha)*gamma(k[:]+1))
         return g
     def eps(self):
-        epsilon=cp.zeros(self.N-1)
-        epsilon[:]=self.c_plus()[1:self.N]*self.mesh.delta_t()/(self.mesh.silengths()[0]**self.alpha)
+        epsilon=cp.zeros(self.N+1)
+        epsilon[:]=self.c_plus()[:]*self.mesh.delta_t()/(self.mesh.silengths()[0]**self.alpha)
         return epsilon
     def eta(self):
-        eta=cp.zeros(self.N-1)
-        eta[:]=self.c_minus()[1:self.N]*self.mesh.delta_t()/(self.mesh.silengths()[0]**self.alpha)
+        eta=cp.zeros(self.N+1)
+        eta[:]=self.c_minus()[:]*self.mesh.delta_t()/(self.mesh.silengths()[0]**self.alpha)
         return eta
     def Construct(self,x=0,t=0):
         B=cp.zeros(shape=(self.N+1,self.N+1))
-        diag=cp.diag(cp.ndarray([1,1+(self.eps()[:]+self.eta()[:])*self.g()[1],1]),k=0)
-        upper_diag=cp.diag(cp.ndarray([self.eps()[:]*self.g()[2]+self.eta()[:]*self.g()[0]]))
-        lower_diag=cp.diag(cp.ndarray([self.eps()[:]*self.g()[0]+self.eta()[:]*self.g()[2]]))
-        
+        diag=cp.diag(cp.ndarray([1,1+(self.eps()[1:self.N]+self.eta()[1:self.N])*self.g()[1],1]),k=0)
+        lower_diag=cp.diag(cp.ndarray([self.eps()[2:self.N]*self.g()[2]+self.eta()[2:self.N]*self.g()[0],0]),k=-1)
+        upper_diag=cp.diag(cp.ndarray([0,self.eps()[1:self.N-1]*self.g()[0]+self.eta()[1:self.N-1]*self.g()[2]]),k=1)
+        B=diag+lower_diag+upper_diag
+        for i in range(2,self.N):
+            ud=cp.diag(cp.ndarray([0,self.eta()[1:self.N-i]*self.g()[i+1]]),k=i)
+            ld=cp.diag(cp.ndarray([self.eps()[i+1:self.N]*self.g()[i+1],0]),k=-i)
+            B+=(ud+ld)
+        return B
+
+
 
 
         
