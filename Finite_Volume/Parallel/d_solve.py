@@ -52,7 +52,7 @@ class Final_Solution():
             else:
                 u[:,i+1]=x
             if(i%10==0):
-                print(f"Iterations:{i}")
+                print("Iteration:",i)
         return cp.asnumpy(u)
     def MatInv(self):
         u_0=self.u_zero_1()
@@ -66,7 +66,7 @@ class Final_Solution():
             A=(self.mass.Construct()-(self.theta)*self.mesh.delta_t()*self.stiff.B(t))
             u[:,i+1]=cp.matmul(cp.linalg.inv(A),b)
             if(i%10==0):
-                print(f"Iterations:{i}")
+                print("Iteration:",i)
         return cp.asnumpy(u)
     def True_Sol(self):
         u_true_final=cp.zeros((self.N+2))

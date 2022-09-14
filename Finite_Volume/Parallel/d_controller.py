@@ -109,6 +109,7 @@ class Controller():
         plt.show()
         norm_2_ss, norm_inf_ss, norm_2_mid, norm_inf_mid=d_norms.Norm(x_np,u[:,-1],u_true[:])[0],d_norms.Norm(x_np,u[:,-1],u_true[:])[1],d_norms.Norm(x_np,u[:,(np.shape(u)[1]-1)//2],u_true_mid[:])[0],d_norms.Norm(x_np,u[:,(np.shape(u)[1]-1)//2],u_true_mid[:])[1]
         norm_2_ss_cgs, norm_inf_ss_cgs, norm_2_mid_cgs, norm_inf_mid_cgs=d_norms.Norm(x_np,u_cgs[:,-1],u_true[:])[0],d_norms.Norm(x_np,u_cgs[:,-1],u_true[:])[1],d_norms.Norm(x_np,u_cgs[:,(np.shape(u)[1]-1)//2],u_true_mid[:])[0],d_norms.Norm(x_np,u_cgs[:,(np.shape(u)[1]-1)//2],u_true_mid[:])[1]
+        print(f"\u0394t={mesh.delta_t()},h={x_np[0]}")
         print("Norms with Mat Inverse")
         print("-----------------------------------------------------------------------------------------------------------")
         print(f"Steady State L\u2082: {norm_2_ss}\nSteady State L\u221e: {norm_inf_ss}")
@@ -119,9 +120,9 @@ class Controller():
         print(f"Steady State L\u2082: {norm_2_ss_cgs}\nSteady State L\u221e: {norm_inf_ss_cgs}")
         print(f"MidPoint L\u2082: {norm_2_mid_cgs}\nMidpoint L\u221e: {norm_inf_mid_cgs}")
         print("-----------------------------------------------------------------------------------------------------------")
-        print(f"MatInv Computational time with \u03b2={beta},\u03b3={gamma},\u03b8={theta},N={N},M={M}:\n{time_inv} seconds")
+        print(f"MatInv Computational time with \u03b2={beta},\u03b3={gamma},\u03b8={theta},\u0394t={mesh.delta_t()},h={x_np[1]-x_np[0]}:\n{time_inv} seconds")
         print("-----------------------------------------------------------------------------------------------------------")
-        print(f"CGS Computational time with \u03b2={beta},\u03b3={gamma},\u03b8={theta},N={N},M={M}:\n{time_cgs} seconds")
+        print(f"CGS Computational time with \u03b2={beta},\u03b3={gamma},\u03b8={theta},\u0394t={mesh.delta_t()},h={x_np[1]-x_np[0]}:\n{time_cgs} seconds")
 
 
 

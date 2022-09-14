@@ -13,4 +13,4 @@ def Norm(x_vector,y_approx,y_true):
         int_f_inf = lambda x: abs(interp_1(x)-interp_2(x))
         int_2[i]=quad(int_f_2,x_vector[i],x_vector[i+1])[0]
         int_inf[i]=quad(int_f_inf,x_vector[i],x_vector[i+1])[0]
-    return [np.max(int_2),np.max(int_inf)]
+    return [np.sum(int_2),np.max(int_inf)]
