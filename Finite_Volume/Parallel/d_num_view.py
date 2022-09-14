@@ -58,6 +58,6 @@ class First_View():
         self.M.set("64")
         self.beta.set(".2")
         self.gamma.set(".5")
-        self.theta.set("1")
+        self.theta.set(".5")
         self.mesh_button=tk.Button(self.Mesh, text="Enter")
         self.mesh_button.pack()
