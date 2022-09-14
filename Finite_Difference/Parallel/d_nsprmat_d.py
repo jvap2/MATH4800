@@ -3,7 +3,7 @@ from d_mesh_d import Mesh
 from math import gamma
 
 
-class A_mat():
+class B_mat():
     def __init__(self,a,b,N,t_0,t_m,M,alpha):
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
         self.alpha=alpha
@@ -27,7 +27,11 @@ class A_mat():
         eta[:]=self.c_minus()[1:self.N]*self.mesh.delta_t()/(self.mesh.silengths()[0]**self.alpha)
         return eta
     def Construct(self,x=0,t=0):
-        A=cp.zeros(shape=(self.N+1,self.N+1))
-        A[0,0],A[self.N,self.N]=1,1
+        B=cp.zeros(shape=(self.N+1,self.N+1))
+        diag=cp.diag(cp.ndarray([1,1+(self.eps()[:]+self.eta()[:])*self.g()[1],1]),k=0)
+        upper_diag=cp.diag(cp.ndarray([self.eps()[:]*self.g()[2]+self.eta()[:]*self.g()[0]]))
+        lower_diag=cp.diag(cp.ndarray([self.eps()[:]*self.g()[0]+self.eta()[:]*self.g()[2]]))
+        
+
 
         
