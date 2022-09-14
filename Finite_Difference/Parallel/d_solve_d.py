@@ -4,10 +4,10 @@ import cupyx
 
 
 class FD_Solve():
-    def __init__(self,a,b,N,t_0,t_m,M,alpha):
+    def __init__(self,a,b,N,t_0,t_m,M,alpha,gamma):
         self.mesh=d_mesh_d.Mesh(a,b,N,t_0,t_m,M)
         self.sink=d_sink_d.Sink_Matrix(a,b,N,t_0,t_m)
-        self.B=d_nsprmat_d.B_mat(a,b,N,t_0,t_m,M,alpha)
+        self.B=d_nsprmat_d.B_mat(a,b,N,t_0,t_m,M,alpha,gamma)
         self.N=N
         self.M=M
     def u_init(self):
@@ -24,4 +24,4 @@ class FD_Solve():
                 u[:,i+1]=cp.matmul(self.dirac_B_mat(),u[:,0])+self.mesh.delta_t()*self.sink.Construct()
             else:
                 u[:,i+1]=cp.matmul(self.B.Construct(),u[:,i])+self.mesh.delta_t()*self.sink.Construct()
-        return u
+        return cp.asnumpy(u)

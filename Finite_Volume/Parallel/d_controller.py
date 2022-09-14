@@ -1,4 +1,5 @@
 from cmath import inf
+from Finite_Difference.Parallel.d_solve_d import FD_Solve
 import imp
 from typing import Final
 from d_num_view import First_View
@@ -38,10 +39,12 @@ class Controller():
         theta=float(self.view.theta.get())
         mesh=Mesh(a,b,N,t_0,t_m,M)
         sol=Final_Solution(a,b,N,t_0,t_m,M,gamma,beta,theta)
+        sol_fd=FD_Solve(a,b,N+1,t_0,t_m,M,beta,gamma)
         u=np.zeros((mesh.NumofSubIntervals()+2,M+1))
         u_cgs=np.zeros((mesh.NumofSubIntervals()+2,M+1))
         u_true=np.zeros((mesh.NumofSubIntervals()+2))
         u_true_mid=np.zeros((mesh.NumofSubIntervals()+2))
+        u_fd=np.zeros((mesh.NumofSubIntervals()+2,M+1))
         start=time.time()
         u[1:mesh.NumofSubIntervals()+1,:]=sol.MatInv()
         end=time.time()
@@ -50,6 +53,10 @@ class Controller():
         u_cgs[1:mesh.NumofSubIntervals()+1,:]=sol.CGS()
         end_cgs=time.time()
         time_cgs=end_cgs-start_cgs
+        start=time.time()
+        u_fd[:,:]=FD_Solve.sol()
+        end=time.time()
+        time_fd=start-end
         u_true,u_true_mid=sol.True_Sol()
         x_np=cp.asnumpy(mesh.mesh_points())
         x,t=np.meshgrid(x_np,cp.asnumpy(mesh.time()))
@@ -66,6 +73,13 @@ class Controller():
         ax_1.set_xlabel('x')
         ax_1.set_ylabel('t')
         ax_1.set_title(f'FDE with dirac \u03b4 with anomolous diffusion\n \u03b2={beta},\u03b3={gamma},\u03b8={theta},N={N},M={M}\nUsing CGS')
+        plt.show()
+        fig_2=plt.figure(2)
+        ax_2=plt.axes(projection='3d')
+        ax_2.plot_surface(x,t,np.transpose(u_fd),cmap="plasma")
+        ax_2.set_xlabel('x')
+        ax_2.set_ylabel('t')
+        ax_2.set_title(f'FDE with dirac \u03b4 with anomolous diffusion\n \u03b2={beta},\u03b3={gamma},\u03b8={theta},N={N},M={M}\nUsing Finite Difference')
         plt.show()
         fig,ax=plt.subplots(1,2, figsize=(8,8))
         ax[0].plot(x_np,u_true)
