@@ -6,5 +6,5 @@ class Sink_Matrix():
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
         self.N=N
     def Construct(self):
-        force=cp.zeros(self.N)
+        force=cp.zeros(self.N+1)
         return force
