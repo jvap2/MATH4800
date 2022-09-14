@@ -4,14 +4,15 @@ from math import gamma
 
 
 class B_mat():
-    def __init__(self,a,b,N,t_0,t_m,M,alpha):
+    def __init__(self,a,b,N,t_0,t_m,M,alpha, gamma):
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
         self.alpha=alpha
+        self.gamma=gamma
     def c_plus(self,x=0,t=0):
-        cplus=.01*cp.ones(self.N+1)
+        cplus=self.gamma*.01*cp.ones(self.N+1)
         return cplus
     def c_minus(self,x=0,t=0):
-        cmin=.01*cp.ones(self.N+1)
+        cmin=(1-self.gamma)*.01*cp.ones(self.N+1)
         return cmin
     def g(self):
         g=cp.zeros(self.N+1)
