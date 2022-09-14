@@ -10,6 +10,7 @@ import cupy as cp
 from scipy.integrate import quad
 import numpy as np
 import math
+import time
 
 
 
@@ -27,7 +28,6 @@ class Final_Solution():
         return cp.exp(-(x-1)**2/(2*.08**2))
     def u_zero_1(self):
         u=cp.zeros(self.N)
-        # u[self.N//2]=(5/40)*self.mesh.N
         u[self.N//2]=1
         return u
     def sol_1(self,x,t):
@@ -70,10 +70,8 @@ class Final_Solution():
         return cp.asnumpy(u)
     def True_Sol(self):
         u_true_final=cp.zeros((self.N+2))
-        u_true_mid=cp.zeros((self.N+2))
         for (i,x) in enumerate(self.mesh.mesh_points()):
             u_true_final[i]=self.sol_1(x,t=1)
-            u_true_mid[i]=self.sol_1(x,t=.5)
-        return cp.asnumpy(u_true_final),cp.asnumpy(u_true_mid)
+        return cp.asnumpy(u_true_final)
 
 
