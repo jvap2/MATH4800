@@ -22,3 +22,8 @@ class MassMatrix():
         upper_diag[:]=(1/(2*h[1:self.N]))*(mid[1:self.N]**2-2*x[1:self.N]*mid[1:self.N]+x[1:self.N]**2)
         M=np.diag(middle_diag, k=0)+np.diag(upper_diag,k=1)+np.diag(lower_diag,k=-1)
         return M
+    def Construct_Prob_1(self):
+        M=np.zeros((self.N))
+        M[(self.N)//2]=1
+        M=np.diag(M,k=0)
+        return M
