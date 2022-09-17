@@ -48,3 +48,8 @@ class Final_Solution():
             else:
                 u[:,i+1]=x
         return u
+    def True_Sol(self):
+        u_true_final=np.zeros((self.N+2))
+        for (i,x) in enumerate(self.mesh.mesh_points()):
+            u_true_final[i]=self.sol_1(x,t=1)
+        return u_true_final

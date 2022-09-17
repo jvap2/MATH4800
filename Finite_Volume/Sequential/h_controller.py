@@ -9,6 +9,8 @@ from h_solve import Final_Solution
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
+from h_norms import Norm
+import time
 
 
 class Controller():
@@ -33,7 +35,13 @@ class Controller():
         mesh=Mesh(a,b,N,t_0,t_m,M)
         sol=Final_Solution(a,b,N,t_0,t_m,M,gamma,beta,theta)
         u=np.zeros((mesh.NumofSubIntervals()+2,M+1))
+        start=time.time()
         u[1:mesh.NumofSubIntervals()+1,:]=sol.CGS()
+        stop=time.time()
+        time_cgs=stop-start
+        u_true=np.zeros((mesh.NumofSubIntervals()+2))
+        u_true=sol.True_Sol()
+        x_np=mesh.mesh_points()
         x,t=np.meshgrid(mesh.mesh_points(),mesh.time())
         print(np.shape(x),np.shape(t))
         fig=plt.figure()
@@ -42,3 +50,20 @@ class Controller():
         ax.set_xlabel('x')
         ax.set_ylabel('t')
         plt.show()
+        fig,ax=plt.subplots(1,2, figsize=(8,8))
+        ax[0].plot(x_np,u_true)
+        ax[1].plot(x_np,u[:,-1])
+        ax[0].set_xlabel('x')
+        ax[0].set_ylabel('y')
+        ax[0].set_title('Behavior of True Solution, t=1')
+        ax[1].set_xlabel('x')
+        ax[1].set_ylabel('y')
+        ax[1].set_title('Behavior of Approximate Solution, t=1')
+        plt.show()
+        norm_2_ss,norm_inf_ss=Norm(x_np,u[:,-1])[0],Norm(x_np,u[:,-1])[1]
+        print(f"\u0394t={mesh.delta_t()},h={x_np[1]-x_np[0]}")
+        print("Norms with CGS")
+        print("-----------------------------------------------------------------------------------------------------------")
+        print(f"Steady State L\u2082: {norm_2_ss}\nSteady State L\u221e:{norm_inf_ss}")
+        print("-----------------------------------------------------------------------------------------------------------")
+        print(f"CGS Computational time with \u03b2={beta},\u03b3={gamma},\u03b8={theta},\u0394t={mesh.delta_t()},h={x_np[1]-x_np[0]}:\n{time_cgs} seconds")
