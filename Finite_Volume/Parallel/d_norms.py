@@ -8,6 +8,7 @@ def Norm(x_vector,y_approx):
     int_L2=0
     int_inf=0
     int_inf_temp=0
+    int_inf_temp_2=0
     t=1 
     x_g=np.array([.77459667,0,-.77459667], dtype=np.float64)
     x_1=((x_vector[1:]-x_vector[:-1])/2)*x_g[0]+(((x_vector[1:]+x_vector[:-1])/2))
@@ -24,10 +25,13 @@ def Norm(x_vector,y_approx):
             true_int=True_Solution(x[j,i],t)
             approx=interp_1(x[j,i])
             int_L2+=w*((true_int-approx)**2)*(x_vector[i+1]-x_vector[i])/2
-            int_inf_temp+=(w*(abs(true_int-approx)))*(x_vector[i+1]-x_vector[i])/2
+            int_inf_temp_2=abs(true_int-approx)
+            if(int_inf_temp_2>int_inf_temp):
+                int_inf_temp=int_inf_temp_2
         if(int_inf_temp>int_inf):
             int_inf=int_inf_temp
         int_inf_temp=0
+        int_inf_temp_2=0
         j=0
     return int_L2,int_inf
 
