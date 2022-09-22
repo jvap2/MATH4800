@@ -6,6 +6,7 @@ from scipy.integrate import quad
 
 def Norm(x_vector,y_approx):
     int_L2=0
+    int_L2_temp=0
     int_inf=0
     int_inf_temp=0
     int_inf_temp_2=0
@@ -24,15 +25,18 @@ def Norm(x_vector,y_approx):
         for (j,w) in enumerate(w_g):
             true_int=True_Solution(x[j,i],t)
             approx=interp_1(x[j,i])
-            int_L2+=w*((true_int-approx)**2)*(x_vector[i+1]-x_vector[i])/2
+            int_L2_temp+=w*((true_int-approx)**2)
             int_inf_temp_2=abs(true_int-approx)
             if(int_inf_temp_2>int_inf_temp):
                 int_inf_temp=int_inf_temp_2
+        int_L2+=(int_L2_temp)*(x_vector[i+1]-x_vector[i])/2
+        int_L2_temp=0
         if(int_inf_temp>int_inf):
             int_inf=int_inf_temp
         int_inf_temp=0
         int_inf_temp_2=0
         j=0
+        int_L2=math.sqrt(int_L2)
     return int_L2,int_inf
 
 def True_Solution(x,t):
