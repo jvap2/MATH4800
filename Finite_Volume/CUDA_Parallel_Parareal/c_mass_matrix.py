@@ -48,9 +48,3 @@ def p_upper_diag(array,h,mid,x,Nsize):
     idx=cuda.threadIdx.x+(cuda.blockDim.x*cuda.blockIdx.x)
     if(idx<Nsize):
         array[idx,idx+1]=(1/(2*h[idx]))*((mid[idx]**2)-2*x[idx]*mid[idx]+x[idx]**2)
-
-
-
-
-m=MassMatrix(-4,4,6,0,1,6)
-print(m.Construct())
