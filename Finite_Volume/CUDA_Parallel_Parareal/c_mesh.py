@@ -92,3 +92,5 @@ def init_threads_blocks(threads, Nsize):
     threads_per_block=threads
     blocks_per_grid=(Nsize+threads_per_block-1)//threads_per_block
     return threads_per_block, blocks_per_grid
+
+

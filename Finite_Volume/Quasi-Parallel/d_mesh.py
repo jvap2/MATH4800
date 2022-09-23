@@ -33,3 +33,5 @@ class Mesh():
         return cp.linspace(self.t_0, self.t_m,self.m+1)
     def delta_t(self):
         return (self.time()[1]-self.time()[0])
+
+

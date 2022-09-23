@@ -24,3 +24,5 @@ class MassMatrix():
         M=cp.diag(M,k=0)
         return M
 
+m=MassMatrix(-4,4,6,0,1,6)
+print(m.Construct())
