@@ -20,10 +20,7 @@ class Mesh():
     def mesh_points(self):
         b,a,Nsize=self.b,self.a,self.N+2
         array=np.zeros(Nsize)
-        threads_per_block, blocks_per_grid= init_threads_blocks(128, Nsize)
-        d_array=cuda.to_device(array)
-        p_linspace[blocks_per_grid,threads_per_block](d_array, a, b, Nsize)
-        d_array.copy_to_host(array)
+        helper_linspace(array,a,b,Nsize)
         return array
     def midpoints(self):
         Nsize=self.N+1
@@ -31,13 +28,15 @@ class Mesh():
         mesh=self.mesh_points()
         thread, block = init_threads_blocks(128, Nsize)
         d_array=cuda.to_device(array)
-        p_midpoints[block,thread](mesh,array,Nsize)
+        d_mesh=cuda.to_device(mesh)
+        p_midpoints[block,thread](d_mesh,d_array,Nsize)
         d_array.copy_to_host(array)
         return array
     def silengths(self):
         Nsize=self.N+1
         array=np.zeros(Nsize)
-        mesh=self.mesh_points()
+        mesh=np.zeros(Nsize+1)
+        mesh[:]=self.mesh_points()
         helper_interval_lengths(mesh,array,Nsize)
         return array
     def time_points(self):
@@ -48,9 +47,9 @@ class Mesh():
     def delta_t(self):
         Nsize=self.M
         array=np.zeros(Nsize)
-        time=self.time_points()
-        d_time=cuda.to_device(time)
-        helper_interval_lengths(d_time,array,Nsize)
+        time=np.zeros(Nsize+1)
+        time[:]=self.time_points()[:]
+        helper_interval_lengths(time,array,Nsize)
         return array
 
         
@@ -74,29 +73,22 @@ def p_midpoints(mesh, mid, Nsize):
 def p_interval_lengths(mesh, length, Nsize):
     idx=cuda.threadIdx.x+(cuda.blockDim.x*cuda.blockIdx.x)
     if(idx<Nsize):
-        length[idx]=(mesh[idx]-mesh[idx+1])
+        length[idx]=(mesh[idx+1]-mesh[idx])
 
 def helper_linspace(array, a, b, Nsize):
-    threads_per_block, blocks_per_grid= init_threads_blocks(32, Nsize)
+    threads_per_block, blocks_per_grid= init_threads_blocks(128, Nsize)
     d_array=cuda.to_device(array)
     p_linspace[blocks_per_grid,threads_per_block](d_array, a, b, Nsize)
     d_array.copy_to_host(array)
 
 def helper_interval_lengths(array, return_array, Nsize):
-    threads_per_block, blocks_per_grid= init_threads_blocks(32, Nsize)
+    threads_per_block, blocks_per_grid= init_threads_blocks(128, Nsize)
     d_r_array=cuda.to_device(return_array)
     d_array=cuda.to_device(array)
-    p_interval_lengths[blocks_per_grid,threads_per_block](d_array,return_array,Nsize)
+    p_interval_lengths[blocks_per_grid,threads_per_block](d_array,d_r_array,Nsize)
     d_r_array.copy_to_host(return_array)
 
 def init_threads_blocks(threads, Nsize):
     threads_per_block=threads
     blocks_per_grid=(Nsize+threads_per_block-1)//threads_per_block
     return threads_per_block, blocks_per_grid
-
-m=Mesh(-4,4,1000,0,1,300)
-print(m.mesh_points(),
-m.time_points(),
-m.midpoints(),
-m.silengths(),
-m.delta_t())
