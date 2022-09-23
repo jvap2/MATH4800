@@ -11,6 +11,8 @@ from scipy.integrate import quad
 import numpy as np
 import math
 import time
+import numba
+from numba import cuda
 
 
 
@@ -83,6 +85,9 @@ class Final_Solution():
         print(f"Used bytes after: {mempool.used_bytes()}")
         print(f"Total_bytes after: {mempool.total_bytes()}")
         return u_sol
+    @cuda.jit
+    def Parareal(self):
+        pass
     def True_Sol(self):
         mempool = cp.get_default_memory_pool()
         u_true_final=cp.zeros((self.N+2))
