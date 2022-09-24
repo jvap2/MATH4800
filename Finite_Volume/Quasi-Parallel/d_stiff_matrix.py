@@ -35,6 +35,8 @@ class StiffMatrix():
         col[1],row[1]=(2-self.gamma)*(1/2)**self.beta-(1-self.gamma)*(3/2)**self.beta,self.gamma*((5/2)**self.beta-2*(3/2)**self.beta+(1/2)**self.beta)
         col[2:]=(1-self.gamma)*(2*(-col_linspace-(1/2))**self.beta-(-col_linspace-(3/2))**self.beta-(-col_linspace+(1/2))**self.beta)
         row[2:]=self.gamma*((row_linspace+(3/2))**self.beta-2*(row_linspace+(1/2))**self.beta+(row_linspace-(1/2))**self.beta)
+        print(col)
+        print(row)
         BR=toeplitz(c=col, r=row)
         return BR
     def B(self,t):
@@ -46,6 +48,8 @@ class StiffMatrix():
         B[:]=(1/(gamma(self.beta+1)*(self.h[0])**(1-self.beta)))*(cp.matmul(cp.diag(K_m_1[:self.N],k=0),self.BL())+cp.matmul(cp.diag(K_m_1[1:],k=0),self.BR()))
         return B
 
+b=StiffMatrix(-4,4,10,0,1,5,.5,.2)
+print(b.B(t=0))
 
 
 
