@@ -18,7 +18,7 @@ class StiffMatrix():
         self.x=self.mesh.mesh_points()
         self.mid=self.mesh.midpoints()
         self.h=self.mesh.silengths()
-    def BL(self):
+    def BL(self, t=0):
         Nsize=self.N
         Nsize_2=self.N-2
         col_linspace=np.empty(shape=Nsize_2)
@@ -39,7 +39,7 @@ class StiffMatrix():
         col[1],row[1]=(1-self.gamma)*((1/2)**self.beta+(5/2)**self.beta-2*(3/2)**self.beta),(1+self.gamma)*(1/2)**self.beta-(self.gamma)*(3/2)**self.beta
         BL=toeplitz(c=col,r=row)
         return BL
-    def BR(self):
+    def BR(self, t=0):
         Nsize=self.N
         Nsize_2=self.N-2
         beta=self.beta
@@ -62,7 +62,7 @@ class StiffMatrix():
         col[1],row[1]=(2-self.gamma)*(1/2)**self.beta-(1-self.gamma)*(3/2)**self.beta,self.gamma*((5/2)**self.beta-2*(3/2)**self.beta+(1/2)**self.beta)
         BR=toeplitz(c=col, r=row)
         return BR
-    def B(self):
+    def B(self, t=0):
         Nsize=self.N
         h=self.h
         beta=self.beta
@@ -128,5 +128,3 @@ def p_assemble_B(B,BL,BR,h,const,beta,Nsize):
         B[row,col]=const*((1/(h[col]**(1-beta)))*(BL[row,col])+(1/(h[col+1]**(1-beta)))*(BR[row,col]))
 
 
-b=StiffMatrix(-4,4,10,0,1,5,.5,.2)
-print(b.B())
