@@ -99,3 +99,5 @@ class Final_Solution():
         return u
 
 
+f=Final_Solution(-4,4,127,0,1,128,.5,.2,.5)
+f.MatInv()
