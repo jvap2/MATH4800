@@ -19,6 +19,7 @@ import scipy
 
 
 
+
 class Final_Solution():
     def __init__(self,a,b,N,t_0,t_m,M,gamma,beta,theta):
         self.mass=MassMatrix(a,b,N,t_0, t_m,M)
@@ -40,46 +41,47 @@ class Final_Solution():
             +quad(u_true, 10**7,10**8, args=(x,t))[0]+quad(u_true,10**8,np.inf,args=(x,t))[0])
         return int
     def Parareal_1(self):
-        course=np.zeros((self.N,self.M+1))
-        fine=np.zeros((self.N,self.M+1))
-        course_temp=np.zeros((self.N,self.M+1))
+        course=np.zeros((self.N,self.M))
+        fine=np.zeros((self.N,self.M))
+        course_temp=np.zeros((self.N,self.M))
         u=np.zeros((self.N,self.M+1))
         u_temp=np.zeros((self.N,self.M+1))
         k=0
-        tol=1e-7
+        tol=1e-5
         error=1
         u_0=self.u_zero_1()
         t=self.mesh.time_points()
         m=self.M
         N=self.N
-        b=np.empty(shape=(N,1,m+1))
-        A=np.empty(shape=(N,N,m+1))
-        A_inv=np.empty(shape=(N,N,m+1))
+        b=np.zeros(shape=(N,1,m))
+        A=np.zeros(shape=(N,N,m))
+        A_inv=np.zeros(shape=(N,N,m))
         while error>tol or k>5:
             u[:,0]=u_0
-            for i in range(1,m):
+            for (j,i) in enumerate(range(1,m+1)):
                 if i==1:
-                    temp=np.matmul((self.mass.Construct_Prob_1_Init()+(1-self.theta)*self.mesh.delta_t()[i-1]*self.stiff.B(self.mesh.time_points()[i-1])),u[:,i-1])+self.mesh.delta_t()[i-1]*self.force.Construct()
-                    b[:,:,i]=np.reshape(temp,newshape=(N,1))
+                    temp=np.matmul((self.mass.Construct_Prob_1_Init()+(1-self.theta)*self.mesh.delta_t()[j]*self.stiff.B(self.mesh.time_points()[j])),u[:,j], dtype=np.float64)+self.mesh.delta_t()[j]*self.force.Construct()
+                    b[:,:,j]=np.reshape(temp,newshape=(N,1))
                 else:
-                    temp=np.matmul((self.mass.Construct()+(1-self.theta)*self.mesh.delta_t()[i-1]*self.stiff.B(self.mesh.time_points()[i-1])),u[:,i-1])+self.mesh.delta_t()[i-1]*self.force.Construct()
-                    b[:,:,i]=np.reshape(temp,newshape=(N,1))
-                A[:,:,i]=(self.mass.Construct()-(self.theta)*self.mesh.delta_t()[i-1]*self.stiff.B(t[i]))
-                A_inv[:,:,i]=np.linalg.inv(A[:,:,i])
-                course[:,i]=np.reshape(np.matmul(A_inv[:,:,i],b[:,:,i]),newshape=(N))
-                u[:,i]=fine[:,i]+course[:,i]-course_temp[:,i]
-            course_temp=course
+                    temp=np.matmul((self.mass.Construct()+(1-self.theta)*self.mesh.delta_t()[j]*self.stiff.B(self.mesh.time_points()[i-1])),u[:,j], dtype=np.float64)+self.mesh.delta_t()[j]*self.force.Construct()
+                    b[:,:,j]=np.reshape(temp,newshape=(N,1))
+                A[:,:,j]=(self.mass.Construct()-(self.theta)*self.mesh.delta_t()[j]*self.stiff.B(t[i]))
+                A_inv[:,:,j]=np.linalg.inv(A[:,:,j])
+                course[:,j]=np.reshape(np.matmul(A_inv[:,:,j],b[:,:,j]),newshape=(N))
+                u[:,i]=fine[:,j]+course[:,j]-course_temp[:,j]
+                course_temp[:,j]=course[:,j]
             d_A=cuda.to_device(A_inv)
             d_b=cuda.to_device(b)
             d_f=cuda.to_device(fine)
-            threads_per_block=(32,32)
-            blocks_per_grid=((m+threads_per_block[0])//threads_per_block[0],(N+threads_per_block[1])//threads_per_block[1])
-            calculate_fine[blocks_per_grid,threads_per_block](d_A,d_b,d_f,N,M+1)
+            threads_per_block=(16,16)
+            blocks_per_grid=((m+threads_per_block[0]-1)//threads_per_block[0],(N+threads_per_block[1]-1)//threads_per_block[1])
+            calculate_fine[blocks_per_grid,threads_per_block](d_A,d_b,d_f,N,m)
+            cuda.synchronize()
             d_f.copy_to_host(fine)
             d_b.copy_to_host(b)
             d_A.copy_to_host(A_inv)
-            error=scipy.linalg.norm(u-u_temp)
-            u_temp=u
+            error=np.max(scipy.linalg.norm(u-u_temp))
+            u_temp[:,:]=u[:,:]
             k=k+1
             print(k)
             print(error)
@@ -96,7 +98,7 @@ def calculate_fine(A,b,fine,Nsize,Msize):
     if idx_x<Msize and idx_y<Nsize:
         for i in range(Nsize):
             fSum+=A[idx_y,i,idx_x]*b[i,0,idx_x]
-    fine[idx_y+1,idx_x]=fSum
+    fine[idx_y,idx_x]=fSum
 
 
 
