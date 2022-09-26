@@ -12,6 +12,7 @@ import math
 import time
 import numba
 from numba import cuda
+import scipy
 
 
 
@@ -41,22 +42,21 @@ class Final_Solution():
     def Parareal_1(self):
         course=np.zeros((self.N,self.M+1))
         fine=np.zeros((self.N,self.M+1))
+        course_temp=np.zeros((self.N,self.M+1))
         u=np.zeros((self.N,self.M+1))
         u_temp=np.zeros((self.N,self.M+1))
         k=0
-        tol=5e-5
+        tol=1e-7
         error=1
         u_0=self.u_zero_1()
         t=self.mesh.time_points()
-        x=self.mesh.mesh_points()
         m=self.M
         N=self.N
         b=np.empty(shape=(N,1,m+1))
         A=np.empty(shape=(N,N,m+1))
         A_inv=np.empty(shape=(N,N,m+1))
-        while error>tol:
+        while error>tol or k>5:
             u[:,0]=u_0
-            fine[:,0]=u_0
             for i in range(1,m):
                 if i==1:
                     temp=np.matmul((self.mass.Construct_Prob_1_Init()+(1-self.theta)*self.mesh.delta_t()[i-1]*self.stiff.B(self.mesh.time_points()[i-1])),u[:,i-1])+self.mesh.delta_t()[i-1]*self.force.Construct()
@@ -67,20 +67,22 @@ class Final_Solution():
                 A[:,:,i]=(self.mass.Construct()-(self.theta)*self.mesh.delta_t()[i-1]*self.stiff.B(t[i]))
                 A_inv[:,:,i]=np.linalg.inv(A[:,:,i])
                 course[:,i]=np.reshape(np.matmul(A_inv[:,:,i],b[:,:,i]),newshape=(N))
-                u[:,i]=fine[:,i]+course[:,i]-course[:,i-1]
+                u[:,i]=fine[:,i]+course[:,i]-course_temp[:,i]
+            course_temp=course
             d_A=cuda.to_device(A_inv)
             d_b=cuda.to_device(b)
             d_f=cuda.to_device(fine)
-            threads_per_block=(16,16)
+            threads_per_block=(32,32)
             blocks_per_grid=((m+threads_per_block[0])//threads_per_block[0],(N+threads_per_block[1])//threads_per_block[1])
-            print(np.shape(A_inv))
-            print(np.shape(b))
             calculate_fine[blocks_per_grid,threads_per_block](d_A,d_b,d_f,N,M+1)
             d_f.copy_to_host(fine)
             d_b.copy_to_host(b)
             d_A.copy_to_host(A_inv)
-            error=np.max(np.linalg.norm(u-u_temp))
+            error=scipy.linalg.norm(u-u_temp)
             u_temp=u
+            k=k+1
+            print(k)
+            print(error)
         return u
 
             
@@ -95,9 +97,6 @@ def calculate_fine(A,b,fine,Nsize,Msize):
         for i in range(Nsize):
             fSum+=A[idx_y,i,idx_x]*b[i,0,idx_x]
     fine[idx_y+1,idx_x]=fSum
-            
-f=Final_Solution(-4,4,127,0,1,128,.5,.2,.5)
-f.Parareal_1()
 
 
 
