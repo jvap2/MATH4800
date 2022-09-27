@@ -13,6 +13,7 @@ import time
 import numba
 from numba import cuda
 import scipy
+from scipy.sparse.linalg import cg,gmres,cgs, minres
 
 
 
@@ -47,46 +48,103 @@ class Final_Solution():
         u=np.zeros((self.N,self.M+1))
         u_temp=np.zeros((self.N,self.M+1))
         k=0
-        tol=1e-5
         error=1
         u_0=self.u_zero_1()
         t=self.mesh.time_points()
         m=self.M
         N=self.N
+        tol=9e-4
         b=np.zeros(shape=(N,1,m))
         A=np.zeros(shape=(N,N,m))
         A_inv=np.zeros(shape=(N,N,m))
-        while error>tol or k>5:
+        B=self.stiff.B()
+        M_1=self.mass.Construct_Prob_1_Init()
+        M_t=self.mass.Construct()
+        F=self.force.Construct()
+        while error>tol and k<30:
             u[:,0]=u_0
             for (j,i) in enumerate(range(1,m+1)):
                 if i==1:
-                    temp=np.matmul((self.mass.Construct_Prob_1_Init()+(1-self.theta)*self.mesh.delta_t()[j]*self.stiff.B(self.mesh.time_points()[j])),u[:,j], dtype=np.float64)+self.mesh.delta_t()[j]*self.force.Construct()
+                    temp=np.matmul((M_1+(1-self.theta)*self.mesh.delta_t()[j]*B),u[:,j])+self.mesh.delta_t()[j]*F
                     b[:,:,j]=np.reshape(temp,newshape=(N,1))
                 else:
-                    temp=np.matmul((self.mass.Construct()+(1-self.theta)*self.mesh.delta_t()[j]*self.stiff.B(self.mesh.time_points()[i-1])),u[:,j], dtype=np.float64)+self.mesh.delta_t()[j]*self.force.Construct()
+                    temp=np.matmul((M_t+(1-self.theta)*self.mesh.delta_t()[j]*B),u[:,j])+self.mesh.delta_t()[j]*F
                     b[:,:,j]=np.reshape(temp,newshape=(N,1))
-                A[:,:,j]=(self.mass.Construct()-(self.theta)*self.mesh.delta_t()[j]*self.stiff.B(t[i]))
+                A[:,:,j]=(M_t-(self.theta)*self.mesh.delta_t()[j]*B)
                 A_inv[:,:,j]=np.linalg.inv(A[:,:,j])
-                course[:,j]=np.reshape(np.matmul(A_inv[:,:,j],b[:,:,j]),newshape=(N))
+                x,exit_code=minres(A=A[:,:,j],b=b[:,:,j], x0=u_temp[:,j],tol=1e-4)
+                if exit_code!=0:
+                    print("Failed Convergence")
+                    break
+                else:
+                    course[:,j]=np.reshape(x,newshape=(N))
                 u[:,i]=fine[:,j]+course[:,j]-course_temp[:,j]
-                course_temp[:,j]=course[:,j]
+            course_temp[:,:]=course[:,:]
             d_A=cuda.to_device(A_inv)
             d_b=cuda.to_device(b)
             d_f=cuda.to_device(fine)
             threads_per_block=(16,16)
             blocks_per_grid=((m+threads_per_block[0]-1)//threads_per_block[0],(N+threads_per_block[1]-1)//threads_per_block[1])
             calculate_fine[blocks_per_grid,threads_per_block](d_A,d_b,d_f,N,m)
-            cuda.synchronize()
             d_f.copy_to_host(fine)
             d_b.copy_to_host(b)
             d_A.copy_to_host(A_inv)
-            error=np.max(scipy.linalg.norm(u-u_temp))
+            error=scipy.linalg.norm(u-u_temp)
             u_temp[:,:]=u[:,:]
             k=k+1
             print(k)
             print(error)
         return u
-
+    def Parareal(self):
+        course=np.zeros((self.N,self.M))
+        fine=np.zeros((self.N,self.M))
+        course_temp=np.zeros((self.N,self.M))
+        u=np.zeros((self.N,self.M+1))
+        u_temp=np.zeros((self.N,self.M+1))
+        k=0
+        error=1
+        x=self.mesh.mesh_points()[1:-1]
+        u_0=self.u_zero(x)
+        t=self.mesh.time_points()
+        m=self.M
+        N=self.N
+        tol=9e-4
+        b=np.zeros(shape=(N,1,m))
+        A=np.zeros(shape=(N,N,m))
+        A_inv=np.zeros(shape=(N,N,m))
+        B=lambda t: self.stiff.B_P_2(t)
+        M_t=self.mass.Construct()
+        F=self.force.Construct()
+        while error>tol and k<40:
+            u[:,0]=u_0
+            for (j,i) in enumerate(range(1,m+1)):
+                temp=np.matmul((M_t+(1-self.theta)*self.mesh.delta_t()[j]*B(t[i])),u[:,j])+self.mesh.delta_t()[j]*F
+                b[:,:,j]=np.reshape(temp,newshape=(N,1))
+                A[:,:,j]=(M_t-(self.theta)*self.mesh.delta_t()[j]*B(t[i]))
+                A_inv[:,:,j]=np.linalg.inv(A[:,:,j])
+                x,exit_code=cgs(A=A[:,:,j],b=b[:,:,j], x0=u_temp[:,i])
+                if exit_code!=0:
+                    print("Failed Convergence")
+                    break
+                else:
+                    course[:,j]=np.reshape(x,newshape=(N))
+                u[:,i]=fine[:,j]+course[:,j]-course_temp[:,j]
+            course_temp[:,:]=course[:,:]
+            d_A=cuda.to_device(A_inv)
+            d_b=cuda.to_device(b)
+            d_f=cuda.to_device(fine)
+            threads_per_block=(16,16)
+            blocks_per_grid=((m+threads_per_block[0]-1)//threads_per_block[0],(N+threads_per_block[1]-1)//threads_per_block[1])
+            calculate_fine[blocks_per_grid,threads_per_block](d_A,d_b,d_f,N,m)
+            d_f.copy_to_host(fine)
+            d_b.copy_to_host(b)
+            d_A.copy_to_host(A_inv)
+            error=scipy.linalg.norm(u-u_temp)
+            u_temp[:,:]=u[:,:]
+            k=k+1
+            print(k)
+            print(error)
+        return u
             
 
 

@@ -41,7 +41,7 @@ class Controller():
         u=np.zeros((mesh.NumofSubIntervals()+2,M+1))
         u_true=np.zeros((mesh.NumofSubIntervals()+2))
         start=time.time()
-        u[1:mesh.NumofSubIntervals()+1,:]=sol.Parareal_1()
+        u[1:mesh.NumofSubIntervals()+1,:]=sol.Parareal()
         end=time.time()
         time_inv=end-start
         x_np=cp.asnumpy(mesh.mesh_points())

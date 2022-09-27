@@ -19,11 +19,8 @@ class MassMatrix():
         threads_per_block=32
         blocks_per_grid=(self.N+threads_per_block-1)//threads_per_block
         p_middle_diag[blocks_per_grid,threads_per_block](d_Mass,d_h,d_midpoints,d_x,Nsize_mid)
-        cuda.synchronize()
         p_upper_diag[blocks_per_grid,threads_per_block](d_Mass,d_h,d_midpoints,d_x,Nsize_other)
-        cuda.synchronize()
         p_lower_diag[blocks_per_grid,threads_per_block](d_Mass,d_h,d_midpoints,d_x,Nsize_other)
-        cuda.synchronize()
         d_Mass.copy_to_host(Mass)
         return Mass
     def Construct_Prob_1_Init(self):

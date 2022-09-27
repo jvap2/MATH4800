@@ -30,7 +30,6 @@ class Mesh():
         d_array=cuda.to_device(array)
         d_mesh=cuda.to_device(mesh)
         p_midpoints[block,thread](d_mesh,d_array,Nsize)
-        cuda.synchronize()
         d_array.copy_to_host(array)
         return array
     def silengths(self):
@@ -80,7 +79,6 @@ def helper_linspace(array, a, b, Nsize):
     threads_per_block, blocks_per_grid= init_threads_blocks(16, Nsize)
     d_array=cuda.to_device(array)
     p_linspace[blocks_per_grid,threads_per_block](d_array, a, b, Nsize)
-    cuda.synchronize()
     d_array.copy_to_host(array)
 
 def helper_interval_lengths(array, return_array, Nsize):
@@ -88,7 +86,6 @@ def helper_interval_lengths(array, return_array, Nsize):
     d_r_array=cuda.to_device(return_array)
     d_array=cuda.to_device(array)
     p_interval_lengths[blocks_per_grid,threads_per_block](d_array,d_r_array,Nsize)
-    cuda.synchronize()
     d_r_array.copy_to_host(return_array)
 
 def init_threads_blocks(threads, Nsize):
