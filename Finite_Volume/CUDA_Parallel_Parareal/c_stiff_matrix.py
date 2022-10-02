@@ -60,13 +60,14 @@ class StiffMatrix():
         Nsize=self.N
         h=self.h
         beta=self.beta
-        K_m_1=.01
-        threads_per_block=16
+        K_m_1=.01*np.ones(Nsize)
+        threads_per_block=128
         blocks_per_grid=(Nsize+threads_per_block-1)//threads_per_block
-        threads_per_block_2D=(16,16)
+        threads_per_block_2D=(128,128)
         blocks_per_grid_2D=((Nsize+threads_per_block_2D[0]-1)//threads_per_block_2D[0],(Nsize+threads_per_block_2D[1]-1)//threads_per_block_2D[1])
         B=np.empty(shape=(Nsize,Nsize))
-        K=np.empty(shape=(Nsize,Nsize))
+        K=np.diag(K_m_1,k=0)
+        print(K)
         B_L_res,B_R_res=np.empty(shape=(Nsize,Nsize)),np.empty(shape=(Nsize,Nsize))
         d_BLres,d_BRres=cuda.to_device(B_L_res),cuda.to_device(B_R_res)
         d_B=cuda.to_device(B)
@@ -85,7 +86,6 @@ class StiffMatrix():
         Nsize=self.N
         h=self.h
         beta=self.beta
-        K_m_1=.01
         x_arr_1=self.mesh.midpoints()[:Nsize]
         x_arr_2=self.mesh.midpoints()[1:]
         d_x_arr_1=cuda.to_device(x_arr_1)
@@ -96,7 +96,7 @@ class StiffMatrix():
         d_k_arr_2=cuda.to_device(k_arr_2)
         threads_per_block=16
         blocks_per_grid=(Nsize+threads_per_block-1)//threads_per_block
-        threads_per_block_2D=(16,16)
+        threads_per_block_2D=(128,128)
         blocks_per_grid_2D=((Nsize+threads_per_block_2D[0]-1)//threads_per_block_2D[0],(Nsize+threads_per_block_2D[1]-1)//threads_per_block_2D[1])
         B=np.empty(shape=(Nsize,Nsize))
         K_1=np.empty(shape=(Nsize,Nsize))
@@ -142,7 +142,7 @@ def p_diag_K_1(mat,K,Nsize):
     if(idx<Nsize):
         mat[idx,idx]=K
 
-@cuda.jit("void(float64[:,:],float64[:,:],float64[:,:],float64)")
+@cuda.jit("void(float64[:,:],float64[:,:],float64[:,:],int32)")
 def p_mat_mult(A,B,C,Nsize):
     col=cuda.threadIdx.x+(cuda.blockDim.x*cuda.blockIdx.x)
     row=cuda.threadIdx.y+(cuda.blockDim.y*cuda.blockIdx.y)
@@ -171,3 +171,8 @@ def non_const_diff(arr,t,x_arr,Nsize):
     idx=cuda.threadIdx.x+(cuda.blockDim.x*cuda.blockIdx.x)
     if idx<Nsize:
         arr[idx]=.002*(1+x_arr[idx]*(2-x_arr[idx])+t**2)
+
+
+
+b=StiffMatrix(0,2,4,0,1,4,.5,.5)
+print(b.B_P_2(t=0))

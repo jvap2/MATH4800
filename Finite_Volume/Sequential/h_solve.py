@@ -10,6 +10,13 @@ from scipy.integrate import quad
 import numpy as np
 import math
 import time
+from scipy.linalg import norm
+import numba
+from numba import cuda
+from scipy.sparse.linalg import cg,gmres,cgs, minres
+from joblib import Parallel,delayed
+
+
 
 class Final_Solution():
     def __init__(self,a,b,N,t_0,t_m,M,gamma,beta,theta):
@@ -53,3 +60,63 @@ class Final_Solution():
         for (i,x) in enumerate(self.mesh.mesh_points()):
             u_true_final[i]=self.sol_1(x,t=1)
         return u_true_final
+    def Parareal(self):
+        m=self.M
+        N=self.N
+        course=np.zeros((self.N,self.M))
+        fine=np.zeros((self.N,self.M))
+        course_temp=np.zeros((self.N,self.M))
+        u=np.zeros((self.N,self.M+1))
+        u_temp=np.zeros((self.N,self.M+1))
+        k=0
+        error=1
+        u_0=self.u_zero(self.mesh.mesh_points()[1:N+1])
+        t=self.mesh.time()
+        tol=1e-6
+        b_temp=np.empty(shape=(N,1))
+        A=np.empty(shape=(N,N))
+        B=lambda t: self.stiff.B(t)
+        fine_m=8
+        d_t=(t[1]-t[0])/8
+        M_t=self.mass.Construct()
+        F=self.force.Construct()
+        M_t_inv=np.linalg.inv(M_t)
+        M_1=np.empty((m,fine_m,N,N))
+        B_t=np.empty((m,fine_m,N,N))
+        for i in range(m):
+            for j in range(fine_m):
+                B_t[i,j,:,:]=B((i*fine_m+j)*d_t)
+                M_1[i,j,:,:]=np.matmul(M_t_inv,d_t*B_t[i,j,:,:])+np.identity(N)
+        print(np.shape(M_1))
+        M_2=d_t*F
+        while error>tol and k<20:
+            u[:,0]=u_0
+            for (j,i) in enumerate(range(1,m+1)):
+                b_temp=np.matmul((M_t+(1-self.theta)*self.mesh.delta_t()*B(t[j])),u[:,j])+self.mesh.delta_t()*F
+                A=(M_t-(self.theta)*self.mesh.delta_t()*B(t[i]))
+                x,exit_code=cgs(A=A,b=b_temp, x0=u[:,j])
+                if exit_code!=0:
+                    print("Failed Convergence")
+                    course[:,j]=np.random.rand(N)
+                else:
+                    course[:,j]=x
+                u[:,i]=fine[:,j]+course[:,j]-course_temp[:,j]
+            course_temp=course
+            fine=np.zeros(shape=(self.N,self.M))
+            print(np.shape(fine))
+            fine=np.transpose(Parallel(n_jobs=-1,verbose=1)\
+                (delayed(Fine_Propogator)(M_1[i,:,:,:],M_2,u[:,i],fine[:,i]) for i in range(m)))
+            print(np.shape(fine))
+            error=norm(u-u_temp)
+            u_temp=u
+            k+=1
+            print(k)
+            print(error)
+        return u
+    
+
+def Fine_Propogator(M_1,M_2,u,u_temp):
+    for j in range(8):
+        u_temp=np.matmul(M_1[j,:,:],u)+M_2
+        u=u_temp
+    return u_temp

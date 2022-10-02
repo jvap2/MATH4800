@@ -37,7 +37,7 @@ class StiffMatrix():
         row[2:]=self.gamma*((row_linspace+(3/2))**self.beta-2*(row_linspace+(1/2))**self.beta+(row_linspace-(1/2))**self.beta)
         BR=toeplitz(c=col, r=row)
         return BR
-    def B(self,t):
+    def B(self,t=0):
         coeff=lambda x,t: .002*(1+x*(2-x)+t**2)
         K_m=np.zeros(self.N+1)
         K_m=coeff(x=self.mid[0:self.N+1],t=t)

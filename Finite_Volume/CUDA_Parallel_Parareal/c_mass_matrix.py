@@ -16,7 +16,7 @@ class MassMatrix():
         Mass=np.zeros((self.N,self.N))
         d_Mass=cuda.to_device(Mass)
         d_x,d_midpoints,d_h=cuda.to_device(x),cuda.to_device(mid),cuda.to_device(h)
-        threads_per_block=32
+        threads_per_block=128
         blocks_per_grid=(self.N+threads_per_block-1)//threads_per_block
         p_middle_diag[blocks_per_grid,threads_per_block](d_Mass,d_h,d_midpoints,d_x,Nsize_mid)
         p_upper_diag[blocks_per_grid,threads_per_block](d_Mass,d_h,d_midpoints,d_x,Nsize_other)
