@@ -5,16 +5,16 @@ If you have a machine that does not have a GPU capable of working with CUDA, i.e
 
 Needed Dependences:<br>
   -Sequential:<br>
-    >-numpy<br>
-    >-scipy<br>
-    >-joblib<br>
+    > numpy<br>
+    > scipy<br>
+    > joblib<br>
   -Quasi Parallel:<br>
-    >-cupy<br>
-    >-cupyx<br>
-    >-joblib<br>
+    > cupy<br>
+    > cupyx<br>
+    > joblib<br>
  -CUDA:<br>
-    >-numba<br>
-    >-numpy<br>
+    > numba<br>
+    > numpy<br>
   
   
 To run the code, just type run the main file in the different folders, depedning on which folder you are using, e.g. run `python h_main.py` in the Sequentail Folder. Enter the initial values as well. There is still room to make this more user friendly, which will be done over time.<br>
