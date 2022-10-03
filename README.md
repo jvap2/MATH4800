@@ -3,7 +3,7 @@ Numerical Methods to describe anomalous, Non-Fickian, diffusion with fractional 
 
 The current structure of the repo is as such:<br>
   >Finite Volume<br>
-    |
+    |<br>
     ->CUDA<br>
     ->Quasi_Parallel<br>
     ->Sequential<br>
