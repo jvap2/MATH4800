@@ -11,8 +11,6 @@ import numpy as np
 import math
 import time
 from scipy.linalg import norm
-import numba
-from numba import cuda
 from scipy.sparse.linalg import cg,gmres,cgs, minres
 from joblib import Parallel,delayed
 
