@@ -36,7 +36,7 @@ class Controller():
         sol=Final_Solution(a,b,N,t_0,t_m,M,gamma,beta,theta)
         u=np.zeros((mesh.NumofSubIntervals()+2,M+1))
         start=time.time()
-        u[1:mesh.NumofSubIntervals()+1,:]=sol.Parareal()
+        u[1:mesh.NumofSubIntervals()+1,:]=sol.Parareal_1()
         stop=time.time()
         time_cgs=stop-start
         u_true=np.zeros((mesh.NumofSubIntervals()+2))
