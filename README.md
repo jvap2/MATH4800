@@ -3,9 +3,10 @@ Numerical Methods to describe anomalous, Non-Fickian, diffusion with fractional 
 
 The current structure of the repo is as such:<br>
   >Finite Volume<br>
-    >-CUDA<br>
-    >-Quasi_Parallel<br>
-    >-Sequential<br>
+    |
+    ->CUDA<br>
+    ->Quasi_Parallel<br>
+    ->Sequential<br>
 If you have a machine that does not have a GPU capable of working with CUDA, i.e. a Mac, you can only work with the sequential folder
 
 Needed Dependences:
