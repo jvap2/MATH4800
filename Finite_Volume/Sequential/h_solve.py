@@ -132,23 +132,24 @@ class Final_Solution():
         B=self.stiff.B_1()
         fine_m=10000//m
         d_t=(t[1]-t[0])/fine_m
-        M_t=self.mass.Construct_Lump()
+        M_t=self.mass.Construct()
+        M_Lump=self.mass.Construct_Lump()
         F=self.force.Construct()
         M_1_construct=self.mass.Construct_Prob_1()
         M_t_inv=np.linalg.inv(M_t)
-        M_1=np.empty((m,fine_m,N,N), dtype=np.float32)
-        for i in range(m):
-            for j in range(fine_m):
-                if i==0 and j==0:
-                    M_1[i,j,:,:]=np.matmul(M_t_inv,d_t*B)+np.matmul(M_t_inv,M_1_construct)
-                else:
-                    M_1[i,j,:,:]=np.matmul(M_t_inv,d_t*B)+np.identity(N)
-        M_2=d_t*F
+        M_1=np.empty(shape=(m,N,N))
+        Mat_for_fine_1=np.matmul(M_t_inv,d_t*B)+np.matmul(M_t_inv,M_1_construct)
+        Mat_for_fine=np.matmul(M_t_inv,d_t*B)+np.identity(N)
+        for j in range(m):
+            if j==0:
+                M_1[j]=np.matmul(np.linalg.matrix_power(Mat_for_fine,fine_m-1),Mat_for_fine_1)
+            else:
+                M_1[j]=np.linalg.matrix_power(Mat_for_fine,fine_m)
         while error>tol:
             u[:,0]=u_0
             b_temp=np.matmul((M_1_construct+(1-self.theta)*self.mesh.delta_t()*B),u[:,0])+self.mesh.delta_t()*F
-            A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B, dtype=np.float32)
-            x,exit_code=gmres(A=A,b=b_temp,tol=5e-2)
+            A=csc_matrix(M_Lump-(self.theta)*self.mesh.delta_t()*B, dtype=np.float32)
+            x,exit_code=gmres(A=A,b=b_temp,tol=5e-3)
             if exit_code!=0:
                 print("Failed Convergence")
             else:
@@ -156,9 +157,9 @@ class Final_Solution():
                 u[:,1]=fine[:,0]+x-course_temp[:,0]
                 course_temp[:,0]=x
             for i in range(2,m+1):
-                b_temp=np.matmul((M_t+(1-self.theta)*self.mesh.delta_t()*B),u[:,i-1])+self.mesh.delta_t()*F
-                A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B)
-                x,exit_code=gmres(A=A,b=b_temp, tol=5e-2)
+                b_temp=np.matmul((M_Lump+(1-self.theta)*self.mesh.delta_t()*B),u[:,i-1])+self.mesh.delta_t()*F
+                A=csc_matrix(M_Lump-(self.theta)*self.mesh.delta_t()*B)
+                x,exit_code=gmres(A=A,b=b_temp, tol=5e-3)
                 if exit_code!=0:
                     print("Failed Convergence")
                 else:
@@ -168,21 +169,19 @@ class Final_Solution():
             print('U:\n',u)
             print('U_temp:\n',u_temp)
             print('fine:\n',fine)
-            error=Error(u,u_temp)
+            error=np.linalg.norm(u-u_temp)
             u_temp=u
             fine=np.zeros(shape=(self.N,self.M), dtype=np.float32)
             fine=np.transpose(Parallel(n_jobs=-1,verbose=1,backend='threading')\
-                (delayed(Fine_Propogator)(M_1[i],M_2,u[:,i],fine[:,i],fine_m) for i in range(m)))
+                (delayed(Fine_Propogator)(M_1[i],u[:,i],fine[:,i]) for i in range(m)))
             k+=1
             print(k)
             print(error)
         return u
     
 
-def Fine_Propogator(Mat_1,Mat_2,u_fine,u_tmp,fine_m):
-    for j in range(fine_m):
-        u_tmp=np.matmul(Mat_1[j,:,:],u_fine)+Mat_2
-        u_fine=u_tmp
+def Fine_Propogator(Mat_1,u_fine,u_tmp):
+    u_tmp=np.matmul(Mat_1,u_fine)
     return u_tmp
 
 def Error(v_1,v_2):
