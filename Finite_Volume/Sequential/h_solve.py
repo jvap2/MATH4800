@@ -122,7 +122,6 @@ class Final_Solution():
         course_temp=np.zeros((self.N,self.M), dtype=np.float32)
         u=np.zeros((self.N,self.M+1), dtype=np.float32)
         u_temp=np.zeros((self.N,self.M+1), dtype=np.float32)
-        u_fine=np.zeros((self.N,self.M+1), dtype=np.float32)
         k=0
         error=1
         u_0=self.u_zero_1()
@@ -131,7 +130,7 @@ class Final_Solution():
         b_temp=np.empty(shape=(N,1), dtype=np.float32)
         A=np.empty(shape=(N,N), dtype=np.float32)
         B=self.stiff.B_1()
-        fine_m=4
+        fine_m=10000//m
         d_t=(t[1]-t[0])/fine_m
         M_t=self.mass.Construct_Lump()
         F=self.force.Construct()
@@ -149,25 +148,28 @@ class Final_Solution():
             u[:,0]=u_0
             b_temp=np.matmul((M_1_construct+(1-self.theta)*self.mesh.delta_t()*B),u[:,0])+self.mesh.delta_t()*F
             A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B, dtype=np.float32)
-            x,exit_code=cgs(A=A,b=b_temp, x0=u[:,0], tol=3e-5)
+            x,exit_code=gmres(A=A,b=b_temp,tol=5e-2)
             if exit_code!=0:
                 print("Failed Convergence")
             else:
                 course[:,0]=x
-            u[:,1]=fine[:,0]+course[:,0]-course_temp[:,0]
+                u[:,1]=fine[:,0]+x-course_temp[:,0]
+                course_temp[:,0]=x
             for i in range(2,m+1):
                 b_temp=np.matmul((M_t+(1-self.theta)*self.mesh.delta_t()*B),u[:,i-1])+self.mesh.delta_t()*F
                 A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B)
-                x,exit_code=cgs(A=A,b=b_temp, x0=u[:,i-1], tol=3e-5)
+                x,exit_code=gmres(A=A,b=b_temp, tol=5e-2)
                 if exit_code!=0:
                     print("Failed Convergence")
                 else:
                     course[:,i-1]=x
-                u[:,i]=fine[:,i-1]+course[:,i-1]-course_temp[:,i-1]
+                    u[:,i]=fine[:,i-1]+x-course_temp[:,i-1]
+                    course_temp[:,i-1]=x
+            print('U:\n',u)
+            print('U_temp:\n',u_temp)
+            print('fine:\n',fine)
             error=Error(u,u_temp)
             u_temp=u
-            course_temp=course
-            u_fine=u
             fine=np.zeros(shape=(self.N,self.M), dtype=np.float32)
             fine=np.transpose(Parallel(n_jobs=-1,verbose=1,backend='threading')\
                 (delayed(Fine_Propogator)(M_1[i],M_2,u[:,i],fine[:,i],fine_m) for i in range(m)))
@@ -177,11 +179,11 @@ class Final_Solution():
         return u
     
 
-def Fine_Propogator(M_1,M_2,u,u_temp,fine_m):
+def Fine_Propogator(Mat_1,Mat_2,u_fine,u_tmp,fine_m):
     for j in range(fine_m):
-        u_temp=np.matmul(M_1[j,:,:],u)+M_2
-        u=u_temp
-    return u_temp
+        u_tmp=np.matmul(Mat_1[j,:,:],u_fine)+Mat_2
+        u_fine=u_tmp
+    return u_tmp
 
 def Error(v_1,v_2):
     err=-1
