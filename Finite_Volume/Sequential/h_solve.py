@@ -63,33 +63,36 @@ class Final_Solution():
         m=self.M
         N=self.N
         course=np.zeros((self.N,self.M), dtype=np.float32)
-        fine=np.zeros((self.N,self.M), dtype=np.float32)
         course_temp=np.zeros((self.N,self.M), dtype=np.float32)
+        fine=np.zeros((self.N,self.M), dtype=np.float32)
         u=np.zeros((self.N,self.M+1), dtype=np.float32)
         u_temp=np.zeros((self.N,self.M+1), dtype=np.float32)
-        u_fine=np.zeros((self.N,self.M+1), dtype=np.float32)
         k=0
         error=1
         u_0=self.u_zero(self.mesh.mesh_points()[1:N+1])
         t=self.mesh.time()
-        tol=1e-6
+        tol=1e-9
         b_temp=np.empty(shape=(N,1), dtype=np.float32)
         A=np.empty(shape=(N,N), dtype=np.float32)
         B=lambda t: self.stiff.B(t)
-        fine_m=4096//m
+        fine_m=10000//m
         d_t=(t[1]-t[0])/fine_m
-        M_t=self.mass.Construct_Lump()
+        M_t=self.mass.Construct()
         F=self.force.Construct()
         M_t_inv=np.linalg.inv(M_t)
-        M_1=np.empty((m,fine_m,N,N), dtype=np.float32)
-        B_t=np.empty((m,fine_m,N,N), dtype=np.float32)
+        M_1=np.empty((m,N,N), dtype=np.float32)
+        B_t=np.empty((N,N),dtype=np.float32)
+        temp_mat=np.empty((N,N),dtype=np.float32)
         for i in range(m):
             for j in range(fine_m):
-                B_t[i,j,:,:]=B((i*fine_m+j)*d_t)
-                M_1[i,j,:,:]=np.matmul(M_t_inv,d_t*B_t[i,j,:,:])+np.identity(N)
+                B_t=B((i*fine_m+j)*d_t)
+                temp_mat=np.identity(N)+d_t*np.matmul(M_t_inv,B_t)
+                if j==0:
+                    M_1[i]=temp_mat
+                else:
+                    M_1[i]=np.matmul(temp_mat,M_1[i])
         print(np.shape(M_1))
-        M_2=d_t*F
-        while error>tol or k<20:
+        while error>tol:
             u[:,0]=u_0
             for (j,i) in enumerate(range(1,m+1)):
                 b_temp=np.matmul((M_t+(1-self.theta)*self.mesh.delta_t()*B(t[j])),u[:,j])+self.mesh.delta_t()*F
@@ -99,14 +102,12 @@ class Final_Solution():
                     print("Failed Convergence")
                     course[:,j]=np.random.rand(N)
                 else:
-                    course[:,j]=x
-                u[:,i]=fine[:,j]+course[:,j]-course_temp[:,j]
-            course_temp=course
-            u_fine=u
-            fine=np.zeros(shape=(self.N,self.M))
-            print(np.shape(fine))
+                    course[:,i-1]=x
+                    u[:,i]=fine[:,i-1]+x-course_temp[:,i-1]
+                    course_temp[:,i-1]=x
+            fine=np.zeros(shape=(self.N,self.M), dtype=np.float32)
             fine=np.transpose(Parallel(n_jobs=-1,verbose=1)\
-                (delayed(Fine_Propogator)(M_1[i],M_2,u_fine[:,i],fine[:,i],fine_m) for i in range(m)))
+                (delayed(Fine_Propogator)(M_1[i],u[:,i],fine[:,i]) for i in range(m)))
             print(np.shape(fine))
             error=norm(u-u_temp)
             u_temp=u
