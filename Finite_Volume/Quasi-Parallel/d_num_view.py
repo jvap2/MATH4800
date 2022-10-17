@@ -55,7 +55,7 @@ class First_View():
         self.N.set("256")
         self.tzero.set("0")
         self.tM.set("1")
-        self.M.set("128")
+        self.M.set("16")
         self.beta.set(".2")
         self.gamma.set(".5")
         self.theta.set("1")

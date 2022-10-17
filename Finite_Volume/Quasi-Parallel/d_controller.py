@@ -47,7 +47,7 @@ class Controller():
         # end=time.time()
         # time_inv=end-start
         start_cgs=time.time()
-        u_cgs[1:mesh.NumofSubIntervals()+1,:]=sol.Parareal_1()
+        u_cgs[1:mesh.NumofSubIntervals()+1,:]=sol.CGS()
         end_cgs=time.time()
         time_cgs=end_cgs-start_cgs
         u_true=sol.True_Sol()
@@ -97,8 +97,8 @@ class Controller():
         print("Norms with CGS")
         print("-----------------------------------------------------------------------------------------------------------")
         print(f"Steady State L\u2082: {norm_2_ss_cgs}\nSteady State L\u221e:{norm_inf_ss_cgs}")
-        print("-----------------------------------------------------------------------------------------------------------")
-        print(f"MatInv Computational time with \u03b2={beta},\u03b3={gamma},\u03b8={theta},\u0394t={mesh.delta_t()},h={x_np[1]-x_np[0]}:\n{time_inv} seconds")
+        # print("-----------------------------------------------------------------------------------------------------------")
+        # print(f"MatInv Computational time with \u03b2={beta},\u03b3={gamma},\u03b8={theta},\u0394t={mesh.delta_t()},h={x_np[1]-x_np[0]}:\n{time_inv} seconds")
         print("-----------------------------------------------------------------------------------------------------------")
         print(f"CGS Computational time with \u03b2={beta},\u03b3={gamma},\u03b8={theta},\u0394t={mesh.delta_t()},h={x_np[1]-x_np[0]}:\n{time_cgs} seconds")
 
