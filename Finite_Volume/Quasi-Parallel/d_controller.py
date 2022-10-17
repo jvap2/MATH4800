@@ -47,7 +47,7 @@ class Controller():
         # end=time.time()
         # time_inv=end-start
         start_cgs=time.time()
-        u_cgs[1:mesh.NumofSubIntervals()+1,:]=sol.CGS()
+        u_cgs[1:mesh.NumofSubIntervals()+1,:]=sol.Parareal()
         end_cgs=time.time()
         time_cgs=end_cgs-start_cgs
         u_true=sol.True_Sol()

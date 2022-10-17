@@ -14,8 +14,7 @@ import time
 from scipy.linalg import norm
 import numba
 from numba import cuda
-from cupy.cuda import Stream
-from cupyx import jit
+from numba.cuda import stream
 
 
 
@@ -135,9 +134,6 @@ class Final_Solution():
                     M_1[i]=temp_mat
                 else:
                     M_1[i]=cp.matmul(temp_mat,M_1[i])
-        # M_1_for_device=cp.ravel(M_1,order='C')
-        print(cp.shape(M_1))
-        M_2=d_t*F
         while error>tol:
             u[:,0]=u_0
             for (j,i) in enumerate(range(1,m+1)):
@@ -146,20 +142,21 @@ class Final_Solution():
                 x,exit_code=linalg.cgs(A=A,b=b_temp, x0=u[:,j])
                 if exit_code!=0:
                     print("Failed Convergence")
-                    course[:,j]=cp.random.rand(N)
                 else:
-                    course[:,j]=x
-                u[:,i]=fine[:,j]+course[:,j]-course_temp[:,j]
-            course_temp=course
-            fine=cp.zeros(shape=(self.N,self.M))
+                    course[:,i-1]=x
+                    u[:,i]=fine[:,i-1]+x-course_temp[:,i-1]
+                    course_temp[:,i-1]=x
+            fine=cp.zeros(shape=(self.N,self.M), dtype=cp.float32)
             threads_per_block=(16,8)
-            blocks_per_grid=(((N*N)+16-1)//16,(m+8-1)//8)
+            blocks_per_grid=(((N)+15)//16, (m+7)//8 )
             Fine_Propogator[blocks_per_grid,threads_per_block](M_1,u,fine,m,N)
+            print(u)
             dif=u-u_temp
             error=cp.linalg.norm(dif)
             u_temp=u
             k+=1
             print(k)
+            print(error)
         u_return=cp.asnumpy(u)
         mempool.free_all_blocks()
         return u_return
@@ -182,8 +179,7 @@ class Final_Solution():
         B=self.stiff.B_1()
         fine_m=10000//m
         d_t=(t[1]-t[0])/fine_m
-        M_t=self.mass.Construct()
-        M_Lump=self.mass.Construct_Lump()
+        M_t=self.mass.Construct_Lump()
         F=self.force.Construct()
         M_1_construct=self.mass.Construct_Prob_1()
         M_t_inv=cp.linalg.inv(M_t)
@@ -198,7 +194,7 @@ class Final_Solution():
         while error>tol:
             u[:,0]=u_0
             b_temp=cp.matmul((M_1_construct+(1-self.theta)*self.mesh.delta_t()*B),u[:,0])+self.mesh.delta_t()*F
-            A=csc_matrix(M_Lump-(self.theta)*self.mesh.delta_t()*B, dtype=cp.float32)
+            A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B, dtype=cp.float32)
             x,exit_code=linalg.gmres(A=A,b=b_temp,tol=5e-3)
             if exit_code!=0:
                 print("Failed Convergence")
@@ -207,8 +203,8 @@ class Final_Solution():
                 u[:,1]=fine[:,0]+x-course_temp[:,0]
                 course_temp[:,0]=x
             for i in range(2,m+1):
-                b_temp=cp.matmul((M_Lump+(1-self.theta)*self.mesh.delta_t()*B),u[:,i-1])+self.mesh.delta_t()*F
-                A=csc_matrix(M_Lump-(self.theta)*self.mesh.delta_t()*B)
+                b_temp=cp.matmul((M_t+(1-self.theta)*self.mesh.delta_t()*B),u[:,i-1])+self.mesh.delta_t()*F
+                A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B)
                 x,exit_code=linalg.gmres(A=A,b=b_temp, tol=5e-3)
                 if exit_code!=0:
                     print("Failed Convergence")
@@ -218,8 +214,9 @@ class Final_Solution():
                     course_temp[:,i-1]=x
             fine=cp.zeros(shape=(self.N,self.M))
             threads_per_block=(16,8)
-            blocks_per_grid=(((N*N)+16-1)//16,(m+8-1)//8)
+            blocks_per_grid=(((N)+16-1)//16, (m+7)//8 )
             Fine_Propogator[blocks_per_grid,threads_per_block](M_1,u,fine,m,N)
+            print(u)
             dif=u-u_temp
             error=cp.linalg.norm(dif)
             u_temp=u
@@ -230,10 +227,13 @@ class Final_Solution():
         mempool.free_all_blocks()
         return u_return
     
-@cuda.jit("void(float32[:,:,:],float32[:,:],float32[:,:],int32,int32)")
+@cuda.jit
 def Fine_Propogator(M,u,u_fine,m,N):
-    x_step=cuda.threadIdx.x+(cuda.blockDim.x*cuda.blockIdx.x)
-    time_step=cuda.threadIdx.y+(cuda.blockDim.y*cuda.blockIdx.y)
-    if(x_step<N and time_step<m):
+    row,col=cuda.grid(2)
+    fSum=0
+    if(row<N and col<m):
         for k in range(N):
-            u_fine[x_step,time_step]+=M[time_step,x_step,k]*u[k,time_step]
+            fSum+=M[col,row,k]*u[k,col]
+        u_fine[row,col]=fSum
+
+

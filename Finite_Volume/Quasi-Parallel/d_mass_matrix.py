@@ -23,6 +23,15 @@ class MassMatrix():
         M[(self.N)//2]=1
         M=cp.diag(M,k=0)
         return M
+    def Construct_Lump(self):
+        x=self.mesh.mesh_points()
+        mid=self.mesh.midpoints()
+        h=self.mesh.silengths()
+        middle_diag=cp.zeros(self.N)
+        middle_diag[:]=(1/(2*h[0:self.N]))*(x[1:self.N+1]**2-2*x[0:self.N]*(x[1:self.N+1]-mid[0:self.N])-mid[0:self.N]**2)
+        middle_diag[:]+=(1/(2*h[1:self.N+1]))*(x[1:self.N+1]**2-2*x[2:self.N+2]*(x[1:self.N+1]-mid[1:self.N+1])-mid[1:self.N+1]**2)
+        middle_diag[1:]+=(1/(2*h[1:self.N]))*(x[2:self.N+1]**2-2*x[2:self.N+1]*mid[1:self.N]+mid[1:self.N]**2)
+        middle_diag[:self.N-1]+=(1/(2*h[1:self.N]))*(mid[1:self.N]**2-2*x[1:self.N]*mid[1:self.N]+x[1:self.N]**2)
+        M=cp.diag(middle_diag, k=0)
+        return M
 
-m=MassMatrix(-4,4,6,0,1,6)
-print(m.Construct())

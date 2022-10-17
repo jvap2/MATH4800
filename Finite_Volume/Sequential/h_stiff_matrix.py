@@ -49,3 +49,6 @@ class StiffMatrix():
         B=np.ones((self.N,self.N))
         B[:]=(1/(gamma(self.beta+1)*(self.h[0])**(1-self.beta)))*(np.matmul(np.diag(K_m_1[:self.N],k=0),self.BL())+np.matmul(np.diag(K_m_1[1:],k=0),self.BR()))
         return B
+
+
+

@@ -38,3 +38,4 @@ class MassMatrix():
         middle_diag[:self.N-1]+=(1/(2*h[1:self.N]))*(mid[1:self.N]**2-2*x[1:self.N]*mid[1:self.N]+x[1:self.N]**2)
         M=np.diag(middle_diag, k=0)
         return M
+
