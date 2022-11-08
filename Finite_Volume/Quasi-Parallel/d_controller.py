@@ -46,10 +46,7 @@ class Controller():
         # u[1:mesh.NumofSubIntervals()+1,:]=sol.MatInv()
         # end=time.time()
         # time_inv=end-start
-        start_cgs=time.time()
-        u_cgs[1:mesh.NumofSubIntervals()+1,:]=sol.Parareal()
-        end_cgs=time.time()
-        time_cgs=end_cgs-start_cgs
+        u_cgs[1:mesh.NumofSubIntervals()+1,:], time_cgs=sol.Parareal_1()
         u_true=sol.True_Sol()
         x_np=cp.asnumpy(mesh.mesh_points())
         x,t=np.meshgrid(x_np,cp.asnumpy(mesh.time()))

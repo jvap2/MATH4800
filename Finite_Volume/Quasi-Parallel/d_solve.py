@@ -105,27 +105,27 @@ class Final_Solution():
         mempool = cp.get_default_memory_pool()
         m=self.M
         N=self.N
-        course=cp.zeros((self.N,self.M), dtype=cp.float32)
-        course_temp=cp.zeros((self.N,self.M), dtype=cp.float32)
-        fine=cp.zeros((self.N,self.M), dtype=cp.float32)
-        u=cp.zeros((self.N,self.M+1), dtype=cp.float32)
-        u_temp=cp.zeros((self.N,self.M+1), dtype=cp.float32)
+        course=cp.zeros((self.N,self.M), dtype=cp.float64)
+        course_temp=cp.zeros((self.N,self.M), dtype=cp.float64)
+        fine=cp.zeros((self.N,self.M), dtype=cp.float64)
+        u=cp.zeros((self.N,self.M+1), dtype=cp.float64)
+        u_temp=cp.zeros((self.N,self.M+1), dtype=cp.float64)
         k=0
         error=1
         u_0=self.u_zero(self.mesh.mesh_points()[1:N+1])
         t=self.mesh.time()
         tol=1e-9
-        b_temp=cp.empty(shape=(N,1), dtype=cp.float32)
-        A=cp.empty(shape=(N,N), dtype=cp.float32)
+        b_temp=cp.empty(shape=(N,1), dtype=cp.float64)
+        A=cp.empty(shape=(N,N), dtype=cp.float64)
         B=lambda t: self.stiff.B(t)
         fine_m=10000//m
         d_t=(t[1]-t[0])/fine_m
         M_t=self.mass.Construct()
         F=self.force.Construct()
         M_t_inv=cp.linalg.inv(M_t)
-        M_1=cp.empty((m,N,N), dtype=cp.float32)
-        B_t=cp.empty((N,N),dtype=cp.float32)
-        temp_mat=cp.empty((N,N),dtype=cp.float32)
+        M_1=cp.empty((m,N,N), dtype=cp.float64)
+        B_t=cp.empty((N,N),dtype=cp.float64)
+        temp_mat=cp.empty((N,N),dtype=cp.float64)
         for i in range(m):
             for j in range(fine_m):
                 B_t=B((i*fine_m+j)*d_t)
@@ -134,19 +134,20 @@ class Final_Solution():
                     M_1[i]=temp_mat
                 else:
                     M_1[i]=cp.matmul(temp_mat,M_1[i])
+        start=time.time()
         while error>tol:
             u[:,0]=u_0
             for (j,i) in enumerate(range(1,m+1)):
                 b_temp=cp.matmul((M_t+(1-self.theta)*self.mesh.delta_t()*B(t[j])),u[:,j])+self.mesh.delta_t()*F
-                A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B(t[i]), dtype=cp.float32)
-                x,exit_code=linalg.cgs(A=A,b=b_temp, x0=u[:,j])
+                A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B(t[i]), dtype=cp.float64)
+                x,exit_code=linalg.cgs(A=A,b=b_temp, x0=u[:,j], tol=5e-2)
                 if exit_code!=0:
                     print("Failed Convergence")
                 else:
                     course[:,i-1]=x
                     u[:,i]=fine[:,i-1]+x-course_temp[:,i-1]
                     course_temp[:,i-1]=x
-            fine=cp.zeros(shape=(self.N,self.M), dtype=cp.float32)
+            fine=cp.zeros(shape=(self.N,self.M), dtype=cp.float64)
             threads_per_block=(16,8)
             blocks_per_grid=(((N)+15)//16, (m+7)//8 )
             Fine_Propogator[blocks_per_grid,threads_per_block](M_1,u,fine,m,N)
@@ -157,25 +158,27 @@ class Final_Solution():
             k+=1
             print(k)
             print(error)
+        end=time.time()
+        parareal_time=end-start
         u_return=cp.asnumpy(u)
         mempool.free_all_blocks()
-        return u_return
+        return u_return, parareal_time
     def Parareal_1(self):
         mempool = cp.get_default_memory_pool()
         m=self.M
         N=self.N
-        course=cp.zeros((self.N,self.M), dtype=cp.float32)
-        fine=cp.zeros((self.N,self.M), dtype=cp.float32)
-        course_temp=cp.zeros((self.N,self.M), dtype=cp.float32)
-        u=cp.zeros((self.N,self.M+1), dtype=cp.float32)
-        u_temp=cp.zeros((self.N,self.M+1), dtype=cp.float32)
+        course=cp.zeros((self.N,self.M), dtype=cp.float64)
+        fine=cp.zeros((self.N,self.M), dtype=cp.float64)
+        course_temp=cp.zeros((self.N,self.M), dtype=cp.float64)
+        u=cp.zeros((self.N,self.M+1), dtype=cp.float64)
+        u_temp=cp.zeros((self.N,self.M+1), dtype=cp.float64)
         k=0
         error=1
         u_0=self.u_zero_1()
         t=self.mesh.time()
         tol=1e-9
-        b_temp=cp.empty(shape=(N,1), dtype=cp.float32)
-        A=cp.empty(shape=(N,N), dtype=cp.float32)
+        b_temp=cp.empty(shape=(N,1), dtype=cp.float64)
+        A=cp.empty(shape=(N,N), dtype=cp.float64)
         B=self.stiff.B_1()
         fine_m=10000//m
         d_t=(t[1]-t[0])/fine_m
@@ -191,11 +194,12 @@ class Final_Solution():
                 M_1[j]=cp.matmul(cp.linalg.matrix_power(Mat_for_fine,fine_m-1),Mat_for_fine_1)
             else:
                 M_1[j]=cp.linalg.matrix_power(Mat_for_fine,fine_m)
+        start=time.time()
         while error>tol:
             u[:,0]=u_0
             b_temp=cp.matmul((M_1_construct+(1-self.theta)*self.mesh.delta_t()*B),u[:,0])+self.mesh.delta_t()*F
-            A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B, dtype=cp.float32)
-            x,exit_code=linalg.gmres(A=A,b=b_temp,tol=5e-3)
+            A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B, dtype=cp.float64)
+            x,exit_code=linalg.gmres(A=A,b=b_temp,tol=5e-2)
             if exit_code!=0:
                 print("Failed Convergence")
             else:
@@ -205,7 +209,7 @@ class Final_Solution():
             for i in range(2,m+1):
                 b_temp=cp.matmul((M_t+(1-self.theta)*self.mesh.delta_t()*B),u[:,i-1])+self.mesh.delta_t()*F
                 A=csc_matrix(M_t-(self.theta)*self.mesh.delta_t()*B)
-                x,exit_code=linalg.gmres(A=A,b=b_temp, tol=5e-3)
+                x,exit_code=linalg.gmres(A=A,b=b_temp, tol=5e-2)
                 if exit_code!=0:
                     print("Failed Convergence")
                 else:
@@ -223,9 +227,11 @@ class Final_Solution():
             k+=1
             print(k)
             print(error)
+        end=time.time()
+        parareal_time=end-start
         u_return=cp.asnumpy(u)
         mempool.free_all_blocks()
-        return u_return
+        return u_return,parareal_time
     
 @cuda.jit
 def Fine_Propogator(M,u,u_fine,m,N):

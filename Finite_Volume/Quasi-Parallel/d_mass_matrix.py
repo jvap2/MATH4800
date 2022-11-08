@@ -1,6 +1,8 @@
 import cupy as cp
 from d_mesh import Mesh
 
+
+
 class MassMatrix():
     def __init__(self,a,b,N,t_0,t_m,M):
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
@@ -34,4 +36,14 @@ class MassMatrix():
         middle_diag[:self.N-1]+=(1/(2*h[1:self.N]))*(mid[1:self.N]**2-2*x[1:self.N]*mid[1:self.N]+x[1:self.N]**2)
         M=cp.diag(middle_diag, k=0)
         return M
+    def Construct_Cubic(self):
+        h=self.mesh.silengths()[0]
+        middle_diag=cp.ones(self.N)*.807292*h
+        one_off_diag=cp.ones(self.N-1)*.1145835*h
+        two_off_diag=cp.ones(self.N-2)*(-.0182292*h)
+        M=cp.sparse.diags(middle_diag,offsets=0)+cp.sparse.diags(one_off_diag,offsets=1)+cp.sparse.diags(one_off_diag,offsets=-1)+\
+            cp.sparse.diags(two_off_diag,offsets=2)+cp.sparse.diags(two_off_diag,offsets=-2)
+        return M
 
+mass=MassMatrix(0,1,5,0,1,3)
+print(mass.Construct_Cubic())

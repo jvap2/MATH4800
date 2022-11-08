@@ -4,8 +4,10 @@ import cupyx.scipy
 from cupyx.scipy.linalg import toeplitz
 from cupyx.scipy.sparse import diags
 from math import gamma
-from d_mesh import Mesh
 
+from pyparsing import col
+from d_mesh import Mesh
+from cupyx.scipy.sparse import csr_matrix
 
 
 class StiffMatrix():
@@ -49,7 +51,52 @@ class StiffMatrix():
         B=cp.ones((self.N,self.N))
         B[:]=(1/(gamma(self.beta+1)*(self.h[0])**(1-self.beta)))*(cp.matmul(cp.diag(K_m[:self.N],k=0),self.BL())+cp.matmul(cp.diag(K_m[1:],k=0),self.BR()))
         return B
-
+    def Cubic_Left_Deriv(self,t):
+        h=self.h()[0]
+        coeff=lambda x,t: .002*(1+x*(2-x)+t**2)
+        K_m=cp.zeros(self.N+1)
+        K_m=coeff(x=self.mid[0:self.N+1],t=t)
+        col_linspace=cp.linspace(3,self.N-1, self.N-3)
+        col_min=cp.empty(shape=self.N)
+        col_plus=cp.empty(shape=self.N)
+        col_min[3:]=((col_linspace+1.5)**self.beta)*((2*col_linspace[:]**2+6*col_linspace[:]+4.5)/(self.beta+1)-(col_linspace[:]**2+3*col_linspace[:]+(23/12))/(self.beta)-(col_linspace[:]**2+3*col_linspace[:]+2.25)/(self.beta+2))
+        col_min[3:]-=((col_linspace+.5)**self.beta)*((8*col_linspace[:]**2+8*col_linspace[:]+2)/(self.beta+1)-(4*col_linspace[:]**2+4*col_linspace[:]-(1/3))/(self.beta)-(4*col_linspace[:]**2+4*col_linspace[:]+1)/(self.beta+2))
+        col_min[3:]+=((col_linspace-.5)**self.beta)*((12*col_linspace[:]**2-12*col_linspace[:]+3)/(self.beta+1)-(6*col_linspace[:]**2-6*col_linspace[:]-.5)/(self.beta)-(6*col_linspace[:]**2-6*col_linspace[:]+1.5)/(self.beta+2))
+        col_min[3:]-=((col_linspace-1.5)**self.beta)*((8*col_linspace[:]**2-24*col_linspace[:]+18)/(self.beta+1)-(4*col_linspace[:]**2-12*col_linspace[:]+(23/3))/(self.beta)-(4*col_linspace[:]**2-12*col_linspace[:]+9)/(self.beta+2))
+        col_min[3:]+=((col_linspace-2.5)**self.beta)*((2*col_linspace[:]**2-10*col_linspace[:]+12.5)/(self.beta+1)-(col_linspace[:]**2-5*col_linspace[:]+(71/12))/(self.beta)-(col_linspace[:]**2-5*col_linspace[:]+6.25)/(self.beta+2))
+        col_plus[3:]=(-((col_linspace+2.5)**self.beta))*((2*col_linspace[:]**2+10*col_linspace[:]+12.5)/(self.beta+1)-(col_linspace[:]**2+5*col_linspace[:]+(71/12))/(self.beta)-(col_linspace[:]**2+5*col_linspace[:]+6.25)/(self.beta+2))
+        col_plus[3:]+=((col_linspace+1.5)**self.beta)*((8*col_linspace[:]**2+24*col_linspace[:]+18)/(self.beta+1)-(4*col_linspace[:]**2+12*col_linspace[:]+(23/3))/(self.beta)-(4*col_linspace[:]**2+12*col_linspace[:]+9)/(self.beta+2))
+        col_plus[3:]-=((col_linspace+.5)**self.beta)*((12*col_linspace[:]**2+12*col_linspace[:]+3)/(self.beta+1)-(6*col_linspace[:]**2+6*col_linspace[:]-.5)/(self.beta)-(6*col_linspace[:]**2+6*col_linspace[:]+1.5)/(self.beta+2))
+        col_plus[3:]+=((col_linspace-.5)**self.beta)*((8*col_linspace[:]**2-8*col_linspace[:]+2)/(self.beta+1)-(4*col_linspace[:]**2-4*col_linspace[:]-(1/3))/(self.beta)-(4*col_linspace[:]**2-4*col_linspace[:]+1)/(self.beta+2))
+        col_plus[3:]-=((col_linspace-1.5)**self.beta)*((2*col_linspace[:]**2-6*col_linspace[:]+4.5)/(self.beta+1)-(col_linspace[:]**2-3*col_linspace[:]+(23/12))/(self.beta)-(col_linspace[:]**2-3*col_linspace[:]+2.25)/(self.beta+2))
+        col_plus[2]=(-(4.5)**self.beta)*((40.5/(self.beta+1))-(239/(12*self.beta))-(20.25/(self.beta+2)))
+        col_plus[2]+=((3.5)**self.beta)*((98/(self.beta+1))-(143/(3*self.beta))-(37/(self.beta+2)))
+        col_plus[2]-=((2.5)**self.beta)*((75/(self.beta+1))-(35.5/(self.beta))-(37.5/(self.beta+2)))
+        col_plus[2]+=((1.5)**self.beta)*((18/(self.beta+1))-(23/(3*self.beta))-(9/(self.beta+2)))
+        col_plus[2]-=((.5)**self.beta)*((1/(2*(self.beta+1)))+(1/(12*self.beta))-(1/(4*(self.beta+2))))
+        col_min[2]=((3.5**self.beta))*((24.5/(self.beta+1))-(143/(12*self.beta))-(12.25/(self.beta+2)))
+        col_min[2]-=((2.5)**self.beta)*((50/(self.beta+1))-(71/(3*self.beta))-(23.5/(self.beta+2)))
+        col_min[2]+=((1.5)**self.beta)*((27/(self.beta+1))-(11.5/self.beta)-12/(self.beta+2))
+        col_min[2]-=((.5)**self.beta)*(2/(self.beta+1)+(1/(3*self.beta))-(1/(self.beta+2)))
+        col_plus[1]=(-(3.5)**self.beta)*((24.5/(self.beta+1))-(143/(12*self.beta))-(12.25/(self.beta+2)))+((2.5)**self.beta)*((50/(self.beta+1))-(71/(3*self.beta))-(25/(self.beta+2)))
+        col_plus[1]+=(-(1.5)**self.beta)*((27/(self.beta+1))-(11.5/self.beta)-(13.5/(self.beta+2)))+((.5)**self.beta)*((2/(self.beta+1))+(1/(3*self.beta))-(1/(self.beta+2)))
+        col_min[1]=((2.5)**self.beta)*((12.5/(self.beta+1))-(71/(12*self.beta))-(6.25/(self.beta+2)))-((1.5)**self.beta)*((18/(self.beta+1))-(23/(3*self.beta))-(9/(self.beta+2)))+((.5)**self.beta)*((3/(self.beta+1))-(4/self.beta)-(1.5/(self.beta+2)))
+        col_plus[0]=(-(2.5)**self.beta)*((12.5/(self.beta+1))-(71/(12*self.beta))-(6.25/(self.beta+2)))+((1.5)**self.beta)*((18/(self.beta+1))-(23/(3*self.beta))-(9/(self.beta+2)))-((.5)**self.beta)*((.5/(self.beta+1))+(2.25/self.beta)-(.75/(self.beta+2)))
+        col_min[0]=((1.5)**self.beta)*((4.5/(self.beta+1))-(23/(12*self.beta))-(2.25/(self.beta+2)))-((.5)**self.beta)*((2/(self.beta+1))+(1/(3*self.beta))-(1/(self.beta+2)))
+        row_plus=cp.zeros(shape=self.N)
+        row_min=cp.zeros(shape=self.N)
+        row_min[0]=((1.5)**self.beta)*((4.5/(self.beta+1))-(23/(12*self.beta))-(2.25/(self.beta+2)))-((.5)**self.beta)*((2/(self.beta+1))+(1/(3*self.beta))-(1/(self.beta+2)))
+        row_plus[0]=(-(2.5)**self.beta)*((12.5/(self.beta+1))-(71/(12*self.beta))-(6.25/(self.beta+2)))+((1.5)**self.beta)*((18/(self.beta+1))-(23/(3*self.beta))-(9/(self.beta+2)))-((.5)**self.beta)*((.5/(self.beta+1))+(2.25/self.beta)-(.75/(self.beta+2)))
+        row_min[1]=((.5)**self.beta)*((.5/(self.beta+1))+(1/(12*self.beta))-(.25/(self.beta+2)))
+        row_plus[1]=((.5)**self.beta)*(2/(self.beta+1)+(1/(3*self.beta))-(1/(self.beta+2)))-((1.5)**self.beta)*((4.5/(self.beta+1))-(23/(12*self.beta))-(2.25/(self.beta+2)))
+        row_plus[2]=(-(.5)**self.beta)*((.5/(self.beta+1))+(1/(12*self.beta))-(.75/(self.beta+2)))
+        B_L_Plus=toeplitz(c=col_plus,r=row_plus)
+        B_L_Min=toeplitz(c=col_min,r=row_min)
+        constant=(self.gamma*(h**(self.beta-1)))/(2*gamma(self.beta))
+        K_plus_diag=constant*cp.sparse.diags(K_m[1:],offsets=0)
+        K_min_diag=constant*cp.sparse.diags(K_m[:self.N],offsets=0)
+        B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
+        return B
 
 
 

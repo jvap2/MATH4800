@@ -36,7 +36,7 @@ def Norm(x_vector,y_approx):
         int_inf_temp=0
         int_inf_temp_2=0
         j=0
-        int_L2=math.sqrt(int_L2)
+    int_L2=math.sqrt(int_L2)
     return int_L2,int_inf
 
 def True_Solution(x,t):
