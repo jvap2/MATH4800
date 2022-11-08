@@ -41,9 +41,8 @@ class MassMatrix():
         middle_diag=cp.ones(self.N)*.807292*h
         one_off_diag=cp.ones(self.N-1)*.1145835*h
         two_off_diag=cp.ones(self.N-2)*(-.0182292*h)
-        M=cp.sparse.diags(middle_diag,offsets=0)+cp.sparse.diags(one_off_diag,offsets=1)+cp.sparse.diags(one_off_diag,offsets=-1)+\
-            cp.sparse.diags(two_off_diag,offsets=2)+cp.sparse.diags(two_off_diag,offsets=-2)
+        M=cp.diag(middle_diag,k=0)+cp.diag(one_off_diag,k=1)+cp.diag(one_off_diag,k=-1)+\
+            cp.diag(two_off_diag,k=2)+cp.diag(two_off_diag,k=-2)
         return M
 
-mass=MassMatrix(0,1,5,0,1,3)
-print(mass.Construct_Cubic())
+

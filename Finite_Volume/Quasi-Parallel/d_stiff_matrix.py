@@ -1,13 +1,14 @@
 from xml.etree.ElementTree import XML
 import cupy as cp
+from cupy import diag
 import cupyx.scipy
 from cupyx.scipy.linalg import toeplitz
 from cupyx.scipy.sparse import diags
 from math import gamma
+from cupyx.scipy.sparse.linalg import LinearOperator
 
 from pyparsing import col
 from d_mesh import Mesh
-from cupyx.scipy.sparse import csr_matrix
 
 
 class StiffMatrix():
@@ -52,7 +53,7 @@ class StiffMatrix():
         B[:]=(1/(gamma(self.beta+1)*(self.h[0])**(1-self.beta)))*(cp.matmul(cp.diag(K_m[:self.N],k=0),self.BL())+cp.matmul(cp.diag(K_m[1:],k=0),self.BR()))
         return B
     def Cubic_Left_Deriv(self,t):
-        h=self.h()[0]
+        h=self.h[0]
         coeff=lambda x,t: .002*(1+x*(2-x)+t**2)
         K_m=cp.zeros(self.N+1)
         K_m=coeff(x=self.mid[0:self.N+1],t=t)
@@ -93,10 +94,11 @@ class StiffMatrix():
         B_L_Plus=toeplitz(c=col_plus,r=row_plus)
         B_L_Min=toeplitz(c=col_min,r=row_min)
         constant=(self.gamma*(h**(self.beta-1)))/(2*gamma(self.beta))
-        K_plus_diag=constant*cp.sparse.diags(K_m[1:],offsets=0)
-        K_min_diag=constant*cp.sparse.diags(K_m[:self.N],offsets=0)
+        K_plus_diag=constant*diag(K_m[1:],k=0)
+        K_min_diag=constant*diag(K_m[:self.N],k=0)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
         return B
+
 
 
 
