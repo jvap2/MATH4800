@@ -4,7 +4,7 @@ import math
 from scipy.interpolate import interp1d
 from scipy.integrate import quad
 
-def Norm(x_vector,y_approx):
+def Norm_Time(x_vector,y_approx):
     int_L2=0
     int_L2_temp=0
     int_inf=0
@@ -44,3 +44,11 @@ def True_Solution(x,t):
     int=(1/math.pi)*(quad(u_true,0,10**3,args=(x,t))[0]+quad(u_true,10**3,10**6,args=(x,t))[0]+quad(u_true,10**6,10**7,args=(x,t))[0]\
         +quad(u_true, 10**7,10**8, args=(x,t))[0]+quad(u_true,10**8,np.inf,args=(x,t))[0])
     return int
+
+def Left_True_Solution(x_mesh):
+    u_true=lambda x: x-x**2
+    u=u_true(x_mesh)
+    return u
+
+def Norm_SS(x_vector,y_vector):
+    

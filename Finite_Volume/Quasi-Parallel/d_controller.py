@@ -14,6 +14,7 @@ import cupy as cp
 import matplotlib.cm as cm
 import d_norms
 import time
+from d_norms import Left_True_Solution
 
 
 
@@ -49,8 +50,8 @@ class Controller():
         # u_cgs[1:mesh.NumofSubIntervals()+1,:]=sol.Solve_Cubic_1()
         u_cub=np.zeros(shape=(mesh.NumofSubIntervals()+2,1))
         u_cub[1:mesh.NumofSubIntervals()+1,0]=sol.Steady_State_Cubic_Test()
-        u_true=sol.True_SS_Sol()
         x_np=cp.asnumpy(mesh.mesh_points())
+        u_true=Left_True_Solution(x_np)
         x,t=np.meshgrid(x_np,cp.asnumpy(mesh.time()))
         # fig=plt.figure(1)
         # ax=plt.axes(projection='3d')
@@ -87,8 +88,8 @@ class Controller():
         ax[1].set_ylabel('y')
         ax[1].set_title('Behavior of Approximate Solution(CGS), t=1')
         plt.show()
-        norm_2_ss,norm_inf_ss=d_norms.Norm(x_np,u[:,-1])[0],d_norms.Norm(x_np,u[:,-1])[1]
-        norm_2_ss_cgs, norm_inf_ss_cgs=d_norms.Norm(x_np,u_cgs[:,-1])[0],d_norms.Norm(x_np,u_cgs[:,-1])[1]
+        norm_2_ss,norm_inf_ss=d_norms.Norm(x_np,u_cub)[0],d_norms.Norm(x_np,u_cub)[1]
+        norm_2_ss_cgs, norm_inf_ss_cgs=d_norms.Norm(x_np,u_true)[0],d_norms.Norm(x_np,u_true)[1]
         print(f"\u0394t={mesh.delta_t()},h={x_np[1]-x_np[0]}")
         print("Norms with Mat Inverse")
         print("-----------------------------------------------------------------------------------------------------------")

@@ -207,6 +207,11 @@ class Final_Solution():
         f=self.force.Construct()
         u=cp.linalg.solve(-B,f)
         return cp.asnumpy(u)
+    def Steady_State_Linear(self):
+        f=self.force.Construct()
+        B=self.stiff.Linear_Left_Deriv()
+        u=cp.linalg.solve(-B,f)
+        return cp.asnumpy(u)
     def Parareal_1(self):
         mempool = cp.get_default_memory_pool()
         m=self.M
