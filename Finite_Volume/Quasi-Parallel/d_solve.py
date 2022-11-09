@@ -101,6 +101,10 @@ class Final_Solution():
         print(f"Used bytes after: {mempool.used_bytes()}")
         print(f"Total_bytes after: {mempool.total_bytes()}")
         return u
+    def True_SS_Sol(self):
+        sol=lambda x: x-x**2
+        u_sol=sol(self.mesh.mesh_points())
+        return cp.asnumpy(u_sol)
     def Parareal(self):
         mempool = cp.get_default_memory_pool()
         m=self.M
@@ -163,6 +167,46 @@ class Final_Solution():
         u_return=cp.asnumpy(u)
         mempool.free_all_blocks()
         return u_return, parareal_time
+    def Solve_Cubic_1(self):
+        mempool = cp.get_default_memory_pool()
+        u_0=self.u_zero(self.mesh.mesh_points()[1:-1])
+        u=cp.zeros((self.N,self.M+1))
+        M_1=self.mass.Construct_Prob_1()
+        M=self.mass.Construct_Cubic()
+        B_l=self.stiff.Cubic_Left_Deriv()
+        F=self.force.Construct()
+        u[:,0]=u_0
+        start=time.time()
+        b=cp.matmul((M_1+(1-self.theta)*self.mesh.delta_t()*B_l),u[:,0])+self.mesh.delta_t()*F
+        A=csc_matrix(M-(self.theta)*self.mesh.delta_t()*B_l)
+        x,exit_code=linalg.cgs(A,b)
+        if exit_code !=0:
+            print("Failed convergence")
+        else:
+            u[:,1]=x
+        for (i,t) in enumerate(self.mesh.time()[2:]):
+            b=cp.matmul((M+(1-self.theta)*self.mesh.delta_t()*B_l),u[:,i+1])+self.mesh.delta_t()*F
+            A=csc_matrix(M-(self.theta)*self.mesh.delta_t()*B_l)
+            x,exit_code=linalg.cgs(A,b)
+            if exit_code !=0:
+                print("Failed convergence")
+                break
+            else:
+                u[:,i+2]=x
+        end=time.time()
+        time_total=end-start
+        u_return=cp.asnumpy(u)
+        print(f"Used bytes before: {mempool.used_bytes()}")
+        print(f"Total_bytes before: {mempool.total_bytes()}")
+        mempool.free_all_blocks()
+        print(f"Used bytes after: {mempool.used_bytes()}")
+        print(f"Total_bytes after: {mempool.total_bytes()}")
+        return u_return,time_total
+    def Steady_State_Cubic_Test(self):
+        B=self.stiff.Cubic_Left_Deriv()
+        f=self.force.Construct()
+        u=cp.linalg.solve(-B,f)
+        return cp.asnumpy(u)
     def Parareal_1(self):
         mempool = cp.get_default_memory_pool()
         m=self.M
