@@ -35,3 +35,5 @@ class Mesh():
         return (self.time()[1]-self.time()[0])
 
 
+m=Mesh(0,1,5,0,1,5)
+print(cp.shape(m.midpoints()))

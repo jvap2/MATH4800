@@ -205,10 +205,10 @@ class Final_Solution():
     def Steady_State_Cubic_Test(self):
         B=self.stiff.Cubic_Left_Deriv()
         f=self.force.Construct()
-        u=cp.linalg.solve(-B,f)
+        u=cp.linalg.solve(B,f)
         return cp.asnumpy(u)
     def Steady_State_Linear(self):
-        f=self.force.Construct()
+        f=self.force.Construct_full()
         B=self.stiff.Linear_Left_Deriv()
         u=cp.linalg.solve(-B,f)
         return cp.asnumpy(u)

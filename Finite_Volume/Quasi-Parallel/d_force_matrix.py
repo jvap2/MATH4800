@@ -3,14 +3,20 @@ from d_mesh import Mesh
 from scipy import integrate
 import cupy as cp
 from math import gamma
+import numpy as np
 
 
 class Force_Matrix():
     def __init__(self,a,b,N,t_0,t_m,M):
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
         self.N=N
+        self.mid=cp.asnumpy(self.mesh.midpoints())
+        self.points=self.mesh.mesh_points()
     def Construct(self):
-        # force=cp.zeros(self.N)
-        force= lambda x: (2*x**(.7))/(.7*gamma(.7))-(x**(-.3)/gamma(.7))
-        f=force(self.mesh.midpoints()[1:])*self.mesh.silengths()[0]
+        f=np.zeros(self.N)
+        # force= lambda x: (2*x**(.7))/(.7*gamma(.7))-(x**(-.3)/gamma(.7))
+        force=lambda x: (-1/(.7*gamma(.7)))*((.7*(x**.3)-2*(x**.7))*(1+x)+((x**.7)-(2/1.7)*(x**1.7)))
+        for i in range(self.N):
+            f[i],_=integrate.quad(force,self.mid[i],self.mid[i+1])
+        f=cp.array(f)
         return f
