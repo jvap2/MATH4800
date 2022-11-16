@@ -62,6 +62,7 @@ class StiffMatrix():
         K_m_ss=cp.ones(self.N+1)
         K_m_ss_nonlin=k_left_non_lin(self.mid)
         col_linspace=cp.linspace(3,self.N-1, self.N-3)
+        j=cp.linspace(3,self.N, self.N-2)
         col_min=cp.empty(shape=self.N)
         col_plus=cp.empty(shape=self.N)
         col_min[3:]=((col_linspace+1.5)**beta)*(-2*(col_linspace**2)-6*col_linspace+((beta**2)/3)+beta-(23/6))+(2/3)*((col_linspace+.5)**beta)*(12*(col_linspace**2)+12*col_linspace-2*(beta**2)-6*beta-1)+\
@@ -87,7 +88,39 @@ class StiffMatrix():
         row_plus[2]=((.5)**beta)*((-(beta**2)/3)-beta-(1/6))
         B_L_Plus=toeplitz(c=col_plus,r=row_plus)
         B_L_Min=toeplitz(c=col_min,r=row_min)
-        constant=(g)/(2*gamma(beta+3)*(h**(1-beta)))
+        B_L_Min[0,0]=(-(.5)**beta)*(6*beta**2+13*beta+3.5)
+        B_L_Plus[0,0]=((1.5)**beta)*(6*beta**2+3*beta-4.5)
+        B_L_Min[0,1]=((.5)**beta)*(3*beta**2+5*beta-.5)
+        B_L_Plus[0,1]=((1.5)**beta)*(-3*beta**2+3*beta+4.5)
+        B_L_Min[1,0]=((1.5)**beta)*(-6*beta**2-3*beta+4.5)
+        B_L_Plus[1,0]=((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))-((2.5)**beta)*(-6*beta**2+7*beta+.5)
+        B_L_Min[1,1]=((1.5)**beta)*(3*beta**2-3*beta-4.5)
+        B_L_Plus[1,1]=(-(.5)**beta)*(2*beta**2+6*beta+1)+((2.5)**beta)*(-3*beta**2+11*beta-3.5)
+        B_L_Min[2,0]=(-(.5)**beta)*((4/3)*beta**2+4*beta+(2/3))+((2.5)**beta)*(-6*beta**2+7*beta+.5)
+        B_L_Min[2,1]=-B_L_Plus[1,1]
+        B_L_Plus[2,1]=((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))-((1.5)**beta)*(2*beta**2+6*beta-23)+((3.5)**beta)*(-3*beta**2+19*beta-23.5)
+        B_L_Min[3,1]=-B_L_Plus[2,1]
+        B_L_Plus[2:,0]=((j-1.5)**beta)*((4/3)*beta**2+13*beta-2*beta*j+38*j-14*j**2-(113/6))-((j+.5)**beta)*(-3*beta**2-13*beta+10*beta*j+14*j-6*j**2-3.5)+\
+            -((j-2.5)**beta)*((1/3)*beta**2+beta-2*j**2+10*j-(71/6))
+        B_L_Min[3:,0]=((j[1:]-3.5)**beta)*((1/3)*beta**2+beta-2*j[1:]**2+14*j[1:]-(143/6))-((j[1:]-2.5)**beta)*((4/3)*beta**2+4*beta+66*j[1:]-14*j[1:]**2-(425/6))+\
+            ((j[1:]-.5)**beta)*(-6*beta**2-23*beta+10*beta*j[1:]+26*j[1:]-6*j[1:]**2-23.5)
+        B_L_Plus[3:,1]=(-(j[1:]-3.5)**beta)*((1/3)*beta**2+beta-2*j[1:]**2+14*j[1:]-(143/6))+((j[1:]-2.5)**beta)*((4/3)*beta**2+4*beta+40*j[1:]-8*j[1:]**2-(142/3))+\
+            ((j[1:]+.5)**beta)*(-3*beta**2-5*beta+8*beta*j[1:]+10*j[1:]-6*j[1:]**2+.5)-((j[1:]-1.5)**beta)*(2*beta**2+6*beta-12*j[1:]**2+36*j[1:]-23)
+        B_L_Min[4:,1]=((j[2:]-4.5)**beta)*((1/3)*beta**2+beta-2*j[2:]**2+18*j[2:]-(239/6))-((j[2:]-3.5)**beta)*((4/3)*beta**2+4*beta+56*j[2:]-8*j[2:]**2-(286/3))-\
+            ((j[2:]-.5)**beta)*(-3*beta**2-13*beta+8*beta*j[2:]+22*j[2:]-6*j[2:]**2-15.5)+((j[2:]-2.5)**beta)*(2*beta**2+6*beta-12*j[2:]**2+60*j[2:]-71)
+        B_L_Plus[self.N-1,self.N-1]=((1.5)**beta)*((4/3)*beta**2+4*beta-(46/3))-((2.5)**beta)*((1/3)*beta**2+beta-(71/6))
+        B_L_Min[self.N-1,self.N-1]=((1.5)**beta)*((1/3)*beta**2+beta-(23/6))-((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))
+        B_L_Plus[self.N-2,self.N-1]=-B_L_Min[self.N-1,self.N-1]
+        B_L_Min[self.N-2,self.N-1]=((.5)*beta)*((1/3)*beta**2+beta+(1/6))
+        B_L_Plus[self.N-3,self.N-1]=-B_L_Min[self.N-2,self.N-1]
+        B_L_Plus[self.N-1,self.N-2]=(-(1.5)**beta)*(2*beta**2+6*beta-23)+((2.5)**beta)*((4/3)*beta**2+4*beta-(142/3))-((3.5)**beta)*((1/3)*beta**2+beta-(143/6))
+        B_L_Min[self.N-1,self.N-2]=((.5)**beta)*(2*beta**2+6*beta+.5)-((1.5)**beta)*((4/3)*beta**2+4*beta-(46/3))-((2.5)**beta)*((1/3)*beta**2+beta-(71/6))
+        B_L_Plus[self.N-2,self.N-2]=-B_L_Min[self.N-1,self.N-2]
+        B_L_Min[self.N-2,self.N-2]=-((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))+((1.5)**beta)*((1/3)*beta**2+beta-(23/6))
+        B_L_Plus[self.N-3,self.N-2]=-B_L_Min[self.N-2,self.N-2]
+        B_L_Min[self.N-3,self.N-2]=((.5)**beta)*((1/3)*beta**2+beta+(1/6))
+        B_L_Plus[self.N-4,self.N-2]=-B_L_Min[self.N-3,self.N-2]
+        constant=(self.gamma*(h**(beta-1)))/(2*gamma(beta+3))
         K_plus_diag=constant*diag(K_m_ss[1:],k=0)
         K_min_diag=constant*diag(K_m_ss[:-1],k=0)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
@@ -109,8 +142,8 @@ class StiffMatrix():
         col_plus[2:]=(-2*((n+.5)**self.beta)+((n+1.5)**self.beta)+((n-.5)**self.beta))
         col_min[2:]=(2*((n-.5)**self.beta)-((n+.5)**self.beta)-((n-1.5)**self.beta))
         const=self.gamma/(gamma(self.beta+1)*self.h[0]**(1-self.beta))
-        K_plus_diag=const*diag(K_m_ss_nonlin[1:],k=0)
-        K_min_diag=const*diag(K_m_ss_nonlin[:self.N],k=0)
+        K_plus_diag=const*diag(K_m_ss[1:],k=0)
+        K_min_diag=const*diag(K_m_ss[:self.N],k=0)
         B_L_Plus=toeplitz(c=col_plus,r=row_plus)
         B_L_Min=toeplitz(c=col_min,r=row_min)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
@@ -119,3 +152,5 @@ class StiffMatrix():
 
 
 
+b=StiffMatrix(0,1,5,0,1,5,1,.7)
+print(b.Cubic_Left_Deriv())

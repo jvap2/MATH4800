@@ -14,8 +14,8 @@ class Force_Matrix():
         self.points=self.mesh.mesh_points()
     def Construct(self):
         f=np.zeros(self.N)
-        # force= lambda x: (2*x**(.7))/(.7*gamma(.7))-(x**(-.3)/gamma(.7))
-        force=lambda x: (-1/(.7*gamma(.7)))*((.7*(x**.3)-2*(x**.7))*(1+x)+((x**.7)-(2/1.7)*(x**1.7)))
+        force= lambda x: (2*x**(.7))/(.7*gamma(.7))-(x**(-.3)/gamma(.7))
+        # force=lambda x: (-1/(.7*gamma(.7)))*((.7*(x**.3)-2*(x**.7))*(1+x)+((x**.7)-(2/1.7)*(x**1.7)))
         for i in range(self.N):
             f[i],_=integrate.quad(force,self.mid[i],self.mid[i+1])
         f=cp.array(f)

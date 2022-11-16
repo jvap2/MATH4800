@@ -52,33 +52,10 @@ def Left_True_Solution(x_mesh):
     return u
 
 def Norm_SS(x_vector,y_vector):
-    int_L2=0
-    int_L2_temp=0
     int_inf=0
     int_inf_temp=0
-    x_large=0
-    x_g=np.array([.57735027,-.57735027], dtype=np.float64)
-    w_g=np.array([1,1], dtype=np.float64)
-    x_1=((x_vector[1:]-x_vector[:-1])/2)*x_g[0]+(((x_vector[1:]+x_vector[:-1])/2))
-    x_2=((x_vector[1:]-x_vector[:-1])/2)*x_g[1]+(((x_vector[1:]+x_vector[:-1])/2))
-    x=np.zeros(shape=(2,len(x_1)),dtype=np.float64)
-    x[0,:]=x_1
-    x[1,:]=x_2
-    for i in range(len(x_vector)-2):
-        interp_1=CubicSpline(x_vector[i:i+3].squeeze(),y_vector[i:i+3].squeeze(), bc_type='natural')
-        for (j,w) in enumerate(w_g):
-            true_int=Left_True_Solution(x[j,i])
-            approx=interp_1(x[j,i])
-            int_L2_temp+=w*((true_int-approx)**2)
-        int_L2+=(int_L2_temp)*(x_vector[i+1]-x_vector[i])/2
-        int_L2_temp=0
-        j=0
     for i in range(len(x_vector)):
         int_inf_temp=abs(y_vector[i]-Left_True_Solution(x_vector[i]))
         if(int_inf_temp>int_inf):
             int_inf=int_inf_temp
-            x_large=x_vector[i]
-        int_inf=float(int_inf)
-    print(x_large)
-    int_L2=math.sqrt(int_L2)
-    return int_L2,int_inf
+    return int_inf
