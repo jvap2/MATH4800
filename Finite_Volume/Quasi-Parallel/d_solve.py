@@ -206,6 +206,7 @@ class Final_Solution():
         B=self.stiff.Cubic_Left_Deriv()
         f=self.force.Construct()
         u=cp.linalg.solve(-B,f)
+        print(u)
         return cp.asnumpy(u)
     def Steady_State_Linear(self):
         f=self.force.Construct()

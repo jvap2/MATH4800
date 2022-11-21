@@ -88,6 +88,7 @@ class StiffMatrix():
         row_plus[2]=((.5)**beta)*((-(beta**2)/3)-beta-(1/6))
         B_L_Plus=toeplitz(c=col_plus,r=row_plus)
         B_L_Min=toeplitz(c=col_min,r=row_min)
+        B_L_Min[:,0],B_L_Plus[:,0],B_L_Min[:,1],B_L_Plus[:,0]=0,0,0,0
         B_L_Min[0,0]=(-(.5)**beta)*(6*beta**2+13*beta+3.5)
         B_L_Plus[0,0]=((1.5)**beta)*(6*beta**2+3*beta-4.5)
         B_L_Min[0,1]=((.5)**beta)*(3*beta**2+5*beta-.5)
@@ -100,10 +101,10 @@ class StiffMatrix():
         B_L_Min[2,1]=-B_L_Plus[1,1]
         B_L_Plus[2,1]=((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))-((1.5)**beta)*(2*beta**2+6*beta-23)+((3.5)**beta)*(-3*beta**2+19*beta-23.5)
         B_L_Min[3,1]=-B_L_Plus[2,1]
-        B_L_Plus[2:,0]=((j-1.5)**beta)*((4/3)*beta**2+13*beta-2*beta*j+38*j-14*j**2-(113/6))-((j+.5)**beta)*(-3*beta**2-13*beta+10*beta*j+14*j-6*j**2-3.5)+\
-            -((j-2.5)**beta)*((1/3)*beta**2+beta-2*j**2+10*j-(71/6))
-        B_L_Min[3:,0]=((j[1:]-3.5)**beta)*((1/3)*beta**2+beta-2*j[1:]**2+14*j[1:]-(143/6))-((j[1:]-2.5)**beta)*((4/3)*beta**2+4*beta+66*j[1:]-14*j[1:]**2-(425/6))+\
-            ((j[1:]-.5)**beta)*(-6*beta**2-23*beta+10*beta*j[1:]+26*j[1:]-6*j[1:]**2-23.5)
+        B_L_Plus[2:,0]=((j-1.5)**beta)*((4/3)*(beta**2)+4*beta+24*j-8*(j**2)-(46/3))-((j+.5)**beta)*(6*(beta**2)-13*beta+10*(beta*j)+14*j-6*(j**2)-3.5)+\
+            -((j-2.5)**beta)*((1/3)*(beta**2)+beta-2*(j**2)+10*j-(71/6))
+        B_L_Min[3:,0]=((j[1:]-3.5)**beta)*((1/3)*(beta**2)+beta-(2*j[1:]**2)+14*j[1:]-(143/6))-((j[1:]-2.5)**beta)*((4/3)*(beta**2)+4*beta+40*j[1:]-(8*j[1:]**2)-(143/3))+\
+            ((j[1:]-.5)**beta)*(-6*(beta**2)-23*beta+10*(beta*j[1:])+26*j[1:]-6*(j[1:]**2)-23.5)
         B_L_Plus[3:,1]=(-(j[1:]-3.5)**beta)*((1/3)*beta**2+beta-2*j[1:]**2+14*j[1:]-(143/6))+((j[1:]-2.5)**beta)*((4/3)*beta**2+4*beta+40*j[1:]-8*j[1:]**2-(142/3))+\
             ((j[1:]+.5)**beta)*(-3*beta**2-5*beta+8*beta*j[1:]+10*j[1:]-6*j[1:]**2+.5)-((j[1:]-1.5)**beta)*(2*beta**2+6*beta-12*j[1:]**2+36*j[1:]-23)
         B_L_Min[4:,1]=((j[2:]-4.5)**beta)*((1/3)*beta**2+beta-2*j[2:]**2+18*j[2:]-(239/6))-((j[2:]-3.5)**beta)*((4/3)*beta**2+4*beta+56*j[2:]-8*j[2:]**2-(286/3))-\
@@ -111,14 +112,14 @@ class StiffMatrix():
         B_L_Plus[self.N-1,self.N-1]=((1.5)**beta)*((4/3)*beta**2+4*beta-(46/3))-((2.5)**beta)*((1/3)*beta**2+beta-(71/6))
         B_L_Min[self.N-1,self.N-1]=((1.5)**beta)*((1/3)*beta**2+beta-(23/6))-((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))
         B_L_Plus[self.N-2,self.N-1]=-B_L_Min[self.N-1,self.N-1]
-        B_L_Min[self.N-2,self.N-1]=((.5)*beta)*((1/3)*beta**2+beta+(1/6))
+        B_L_Min[self.N-2,self.N-1]=((.5)*beta)*((1/3)*(beta**2)+beta+(1/6))
         B_L_Plus[self.N-3,self.N-1]=-B_L_Min[self.N-2,self.N-1]
-        B_L_Plus[self.N-1,self.N-2]=(-(1.5)**beta)*(2*beta**2+6*beta-23)+((2.5)**beta)*((4/3)*beta**2+4*beta-(142/3))-((3.5)**beta)*((1/3)*beta**2+beta-(143/6))
-        B_L_Min[self.N-1,self.N-2]=((.5)**beta)*(2*beta**2+6*beta+.5)-((1.5)**beta)*((4/3)*beta**2+4*beta-(46/3))-((2.5)**beta)*((1/3)*beta**2+beta-(71/6))
+        B_L_Plus[self.N-1,self.N-2]=(-(1.5)**beta)*(2*beta**2+6*beta-23)+((2.5)**beta)*((4/3)*(beta**2)+4*beta-(142/3))-((3.5)**beta)*((1/3)*beta**2+beta-(143/6))
+        B_L_Min[self.N-1,self.N-2]=((.5)**beta)*(2*beta**2+6*beta+1)-((1.5)**beta)*((4/3)*beta**2+4*beta-(46/3))-((2.5)**beta)*((1/3)*beta**2+beta-(71/6))
         B_L_Plus[self.N-2,self.N-2]=-B_L_Min[self.N-1,self.N-2]
-        B_L_Min[self.N-2,self.N-2]=-((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))+((1.5)**beta)*((1/3)*beta**2+beta-(23/6))
+        B_L_Min[self.N-2,self.N-2]=((1.5)**beta)*((1/3)*(beta**2)+beta-(23/6))-((.5)**beta)*((4/3)*(beta)**2+4*beta+(2/3))
         B_L_Plus[self.N-3,self.N-2]=-B_L_Min[self.N-2,self.N-2]
-        B_L_Min[self.N-3,self.N-2]=((.5)**beta)*((1/3)*beta**2+beta+(1/6))
+        B_L_Min[self.N-3,self.N-2]=((.5)**beta)*((1/3)*(beta**2)+beta+(1/6))
         B_L_Plus[self.N-4,self.N-2]=-B_L_Min[self.N-3,self.N-2]
         constant=(self.gamma*(h**(beta-1)))/(2*gamma(beta+3))
         K_plus_diag=constant*diag(K_m_ss[1:],k=0)
@@ -152,5 +153,5 @@ class StiffMatrix():
 
 
 
-b=StiffMatrix(0,1,5,0,1,5,1,.7)
-print(b.Cubic_Left_Deriv())
+b=StiffMatrix(0,1,10,0,1,5,1,.7)
+print(b.Cubic_Left_Deriv()[:,0:2])
