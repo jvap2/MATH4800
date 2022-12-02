@@ -47,7 +47,7 @@ def True_Solution(x,t):
     return int
 
 def Left_True_Solution(x_mesh):
-    u_true=lambda x: x-x**2
+    u_true=lambda x: x**2-x**3
     u=u_true(x_mesh)
     return u
 
