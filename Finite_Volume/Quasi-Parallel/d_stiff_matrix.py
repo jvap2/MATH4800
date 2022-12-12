@@ -117,13 +117,9 @@ class StiffMatrix():
         B_L_Min[5:,2]=-B_L_Plus[4:self.N-1,2]
         B_L_Plus[2:,0]=((j-1.5)**beta)*((4/3)*(beta**2)+4*beta-8*j**2+24*j-(46/3))-((j-2.5)**beta)*((1/3)*(beta**2)+beta-2*j**2+10*j-(71/6))-\
             ((j+.5)**beta)*(-6*(beta**2)-13*beta+10*beta*j-6*j**2+14*j-3.5)
-        # B_L_Min[3:,0]=((j_1-3.5)**beta)*((1/3)*(beta**2)+beta-2*j_1**2+14*j_1-(143/6))-((j_1-2.5)**beta)*((4/3)*(beta**2)+4*beta-8*j_1**2+40*j_1-(142/3))+\
-        #     ((j_1-.5)**beta)*(-6*(beta**2)-23*beta+10*beta*j_1-6*j_1**2+26*j_1-23.5)
         B_L_Min[3:,0]=-B_L_Plus[2:self.N-1,0]
         B_L_Plus[3:,1]=-((j_1-3.5)**beta)*((1/3)*(beta**2)+beta-2*(j_1**2)+14*j_1-(143/6))+((j_1-2.5)**beta)*((4/3)*beta**2+4*beta+40*j_1-8*(j_1**2)-(142/3))+\
             ((j_1+.5)**beta)*(-3*beta**2-5*beta+8*beta*(j_1)+10*j_1-6*(j_1**2)+.5)-((j_1-1.5)**beta)*(2*beta**2+6*beta-12*j_1**2+36*j_1-23)
-        # B_L_Min[4:,1]=((j_2-4.5)**beta)*((1/3)*beta**2+beta-2*j_2**2+18*j_2-(239/6))-((j_2-3.5)**beta)*((4/3)*beta**2+4*beta+56*j_2-8*j_2**2-(286/3))-\
-        #     ((j_2-.5)**beta)*(-3*beta**2-13*beta+8*beta*j_2+22*j_2-6*j_2**2-15.5)+((j_2-2.5)**beta)*(2*beta**2+6*beta-12*j_2**2+60*j_2-71)
         B_L_Min[4:,1]=-B_L_Plus[3:self.N-1,1]
         B_L_Plus[self.N-1,self.N-1]=((1.5)**beta)*((4/3)*beta**2+4*beta-(46/3))-((2.5)**beta)*((1/3)*beta**2+beta-(71/6))
         B_L_Min[self.N-1,self.N-1]=((1.5)**beta)*((1/3)*beta**2+beta-(23/6))-((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))
@@ -145,6 +141,65 @@ class StiffMatrix():
         K_min_diag=constant*diag(K_m_ss_nonlin[:self.N],k=0)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
         return B
+    def Cubic_Right_Deriv(self):
+        beta=self.beta
+        g=self.gamma
+        h=self.h[1]
+        coeff=lambda x,t: .002*(1+x*(2-x)+t**2)
+        K_m_1=cp.ones(self.N+1)*.01
+        K_m=cp.zeros(self.N+1)
+        K_m=coeff(x=self.mid[0:self.N+1],t=t)
+        k_left_non_lin=lambda x: 1+x
+        K_m_ss=cp.ones(self.N+1)
+        K_m_ss_nonlin=k_left_non_lin(self.mid[0:])
+        N=self.N
+        j=cp.linspace(1,self.N-3, self.N-2)
+        j_1=cp.linspace(1,self.N-2, self.N-1)
+        q=cp.linspace(-3,-self.N-1, self.N-3)
+        col_min=cp.empty(shape=self.N)
+        col_plus=cp.empty(shape=self.N)
+        row_min=cp.empty(shape=self.N)
+        row_plus=cp.empty(shape=self.N)
+        row_plus[3:]=(-(-q+1.5)**beta)*((-beta**2)/3-beta+2*q**2-6*q+(23/6))+((-q+.5)**beta)*((-4*beta**2)/3-4*beta+8*q**2-8*q-2/3)-\
+            ((-q-.5)**beta)*(-2*(beta**2)-6*beta+12*q**2+12*q-1)+((-q-1.5)**beta)*((-4*beta**2)/3-4*beta+8*q**2+24*q+46/3)-((-q-2.5)**beta)*((-beta**2)/3-beta+2*q**2+10*q+71/6)
+        row_min[3:]=((-q+2.5)**beta)*((-beta**2)/3-beta+2*q**2-10*q+71/6)-((-q+1.5)**beta)*((-4*beta**2)/3-4*beta+8*q**2-24*q+46/3)+((-q+.5)**beta)*(-2*(beta**2)-6*beta+12*q**2-12*q-1)-\
+            ((-q-.5)**beta)*((-4*beta**2)/3-4*beta+8*q**2+8*q-2/3)+((-q-1.5)**beta)*((-beta**2)/3-beta+2*q**2+6*q+23/6)
+        row_min[2]=(4.5**beta)*((-beta**2)/3-beta+239/6)-(3.5**beta)*((-4*beta**2)/3-4*beta+286/3)+(2.5**beta)*(-2*(beta**2)-6*beta+71)-(1.5**beta)*((-4*beta**2)/3-4*beta+46/3)+(.5*beta)*((-beta**2)/3-beta-1/6)
+        row_plus[2]=(-(3.5**beta))*((-beta**2)/3-beta+143/6)+(2.5**beta)*((-4*beta**2)/3-4*beta+142/3)-(1.5**beta)*(-2*(beta**2)-6*beta+23)+(.5**beta)*((-4*beta**2)/3-4*beta-2/3)
+        row_min[1]=-row_plus[2]
+        row_plus[1]=(-(2.5)**beta)*((-beta**2)/3-beta+(71/6))+(1.5**beta)*((-4*beta**2)/3-4*beta+46/3)-(.5**beta)*(-2*(beta**2)-6*beta-1)
+        row_min[0],col_min[0]=-row_plus[1],-row_plus[1]
+        row_plus[0]=(-(1.5)**beta)*((-beta**2)/3-beta+23/6)+(.5**beta)*((-4*beta**2)/3-4*beta-2/3)
+        col_plus[0]=row_plus[0]
+        col_min[1]=-row_plus[0]
+        col_plus[1]=(-(.5)**beta)*((-beta**2)/3-beta-1/6)
+        col_min[2]=-col_plus[1]
+        B_R_Plus=toeplitz(c=col_plus,r=row_plus)
+        B_R_Min=toeplitz(c=col_min,r=row_min)
+        B_R_Min[:,0],B_R_Plus[:,0],B_R_Min[:,1],B_R_Plus[:,1]=0,0,0,0
+        B_R_Min[:,2],B_R_Plus[:,2],B_R_Min[:,N-3],B_R_Plus[:,N-3]=0,0,0,0
+        B_R_Min[:,N-2],B_R_Plus[:,N-2],B_R_Min[:,N-1],B_R_Plus[:,N-1]=0,0,0,0
+        B_R_Plus[0:N-3,N-1]=(-(N-j+.5)**beta)*(6*(beta**2)+(13-10*N)*beta+10*beta*j+6*(j**2)+j*(14-12*N)+6*(N**2)-14*N+3.5)+\
+            ((N-j-1.5)**beta)*((-4*beta**2)/3-4*beta+8*(j**2)+j*(24-16*N)+8*(N**2)-24*N+(46/3))-((N-j-2.5)**beta)*((-beta**2)/3-beta+2*(j**2)+j*(10-4*N)+2*(N**2)-10*N+71/6)
+        B_R_Min[0:N-2,N-1]=((N-j_1-1.5)**beta)*((-beta**2)/3-beta+2*j_1**2+j_1*(6-4*N)+2*N**2-6*N+23/6)-((N-j_1-.5)**beta)*((-4*beta**2)/3-4*beta+8*j_1**2+(8-16*N)*j_1+8*N**2-8*N-2/3)+\
+            ((N-j_1+1.5)**beta)*(6*beta**2+(3-10*N)*beta+10*beta*j_1+6*j_1**2+(2-12*N)*j_1+6*N**2-2*N-4.5)
+        B_R_Min[N-3,N-1]=((.5)**beta)*((-beta**2)/3-beta-1/6)-((1.5)**beta)*((-4*beta**2)/3-4*beta+46/3)+((3.5)**beta)*(6*beta**2-17*beta+15.5)
+        B_R_Plus[N-3,N-1]=(-(2.5)**beta)*(6*beta**2-7*beta-.5)+((.5)**beta)*((-4*beta**2)/3-4*beta-2/3)
+        B_R_Min[N-2,N-1]=-B_R_Plus[N-3,N-1]
+        B_R_Plus[N-2,N-1]=(-(1.5)**beta)*(6*beta*82+3*beta-4.5)
+        B_R_Min[N-1,N-1]=-B_R_Plus[N-2,N-1]
+        B_R_Plus[N-1,N-1]=(-(.5)**beta)*(6*beta**2+13*beta+3.5)
+        B_R_Plus[0:N-4,N-2]=(-(N-j_1[:-1]-3.5)**beta)*((-beta**2)/3-beta+2*j_1[:-1]**2+j_1[:-1]*(14-4*N)+2*N**2-14*N+143/6)+((N-j_1[:-1]-2.5)**beta)*((-4*beta**2)/3-4*beta+8*j_1[:-1]**2+40*j_1[:-1]-16*N*j_1[:-1]+8*N**2-40*N+142/3)-\
+            ((N-j_1[:-1]-1.5)**beta)*(-2*beta**2-6*beta+12*j_1[:-1]**2+36*j_1[:-1]-24*j_1[:-1]*N+12*N**2-36*N+23)+((N-j_1[:-1]+.5)**beta)*(3*beta**2+beta*(8*j_1[:-1]-8*N+5)+6*j_1[:-1]**2+j_1[:-1]*(10-12*N)+6*N**2-10*N-.5)
+        B_R_Min[0:N-3,N-2]=((N-j_1-2.5)**beta)*(-(beta**2)/3-beta+2*j_1**2+j_1*(10-4*N)+2*N**2-10*N+71/6)-((N-j_1-1.5)**beta)*((-4*beta**2)/3-4*beta+8*j_1**2+24*j_1-16*j_1*N+8*N**2-24*N+46/3)+\
+            ((N-j_1-.5)**beta)*(-2*beta**2-6*beta+12*j_1**2+12*j_1-24*N*j_1+12*N**2-12*N-1)-((N-j+1.5)**beta)*(3*beta**2+beta*(8*j_1-8*N-3)+6*j_1**2-2*j_1*(6*N+1)+6*N**2+2*N-4.5)
+        B_R_Min[N-1,N-2]=(-(1.5)**beta)*(3*beta**2-3*beta-4.5)
+        B_R_Plus[N-1,N-2]=((.5)**beta)*(3*beta**2+5*beta-.5)
+        B_R_Plus[N-2,N-2]=-B_R_Min[N-1,N-2]
+        B_R_Min[N-2,N-1]=((.5)**beta)*(-2*beta**2-6*beta-1)-(2.5**beta)*(3*beta**2-11*beta+3.5)
+        B_R_Plus[N-3,N-1]=-B_R_Min[N-2,N-1]
+        B_R_Min[N-3,N-1]=(-(.5)**beta)*((-4*beta**2)/3-4*beta-2/3)+((1.5)**beta)*(-2*beta**2-6*beta+23)-(3.5**beta)*(3*beta**2-19*beta+23.5)
+        B_R_Plus[N-4,N-1]=-B_R_Min[N-3,N-1]
     def Linear_Left_Deriv(self):
         n=cp.linspace(2,self.N-1, self.N-2)
         k_left_non_lin=lambda x: 1+x
