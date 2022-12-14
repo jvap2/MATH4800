@@ -208,9 +208,19 @@ class Final_Solution():
         u=cp.linalg.solve(-B,f)
         print(u)
         return cp.asnumpy(u)
+    def Right_Cubic_Test(self):
+        B=self.stiff.Cubic_Right_Deriv()
+        f=self.force.Construct_Right()
+        u=cp.linalg.solve(-B,f)
+        return cp.asnumpy(u)
     def Steady_State_Linear(self):
         f=self.force.Construct()
         B=self.stiff.Linear_Left_Deriv()
+        u=cp.linalg.solve(-B,f)
+        return cp.asnumpy(u)
+    def Linear_Right(self):
+        f=self.force.Construct_Right()
+        B=self.stiff.Linear_Right_Deriv()
         u=cp.linalg.solve(-B,f)
         return cp.asnumpy(u)
     def Parareal_1(self):
