@@ -152,7 +152,7 @@ class StiffMatrix():
         # K_m=coeff(x=self.mid[0:self.N+1],t=t)
         k_left_non_lin=lambda x: 1+x
         K_m_ss=cp.ones(self.N+1)
-        K_m_ss_nonlin=k_left_non_lin(self.mid[0:])
+        K_m_ss_nonlin=k_left_non_lin(self.mid)
         N=self.N
         j=cp.linspace(1,self.N-3, self.N-3)
         j_1=cp.linspace(1,self.N-2, self.N-2)
@@ -165,7 +165,6 @@ class StiffMatrix():
             (((-q[1:]+1.5)**beta)*((-beta**2)/3-beta+2*q[1:]**2-6*q[1:]+(23/6))+((-q[1:]-.5)**beta)*(-2*beta**2-6*beta+12*q[1:]**2+12*q[1:]-1)+((-q[1:]-2.5)**beta)*((-beta**2)/3-beta+2*q[1:]**2+10*q[1:]+(71/6)))
         row_min[2:]=((-q+2.5)**beta)*((-beta**2)/3-beta+2*q**2-10*q+(71/6))+((-q+.5)**beta)*(-2*beta**2-6*beta+12*q**2-12*q-1)+((-q-1.5)**beta)*((-beta**2)/3-beta+2*q**2+6*q+(23/6))-\
             (((-q+1.5)**beta)*((-4*beta**2)/3-4*beta+8*q**2-24*q+(46/3))+((-q-.5)**beta)*((-4*beta**2)/3-4*beta+8*q**2+8*q-(2/3)))
-        # row_plus[3:]=-row_min[2:-1]
         row_plus[2]=(2.5**beta)*((-4*beta**2)/3-4*beta+(142/3))+(.5**beta)*((-4*beta**2)/3-4*beta-(2/3))-((3.5**beta)*((-beta**2)/3-beta+(143/6))+(1.5**beta)*(-2*beta**2-6*beta+23))
         row_min[1]=-row_plus[2]
         row_plus[1]=(1.5**beta)*((-4*beta**2)/3-4*beta+(46/3))-((2.5**beta)*((-beta**2)/3-beta+71/6)+(.5**beta)*(-2*beta**2-6*beta-1))
@@ -213,21 +212,21 @@ class StiffMatrix():
         B_R_Min[N-4,N-3]=-((.5)**beta)*((-4*beta**2)/3-4*beta-(2/3))+(1.5**beta)*(-2*beta**2-6*beta+23)-(2.5**beta)*((-4*beta**2)/3-4*beta+142/3)+(4.5**beta)*((2*beta**2)/3-7*beta+143/6)
         B_R_Plus[N-5,N-3]=-B_R_Min[N-4,N-3]
         B_R_Min[0,2]=(4.5**beta)*((-beta**2)/3-beta+(239/6))+(2.5**beta)*(-2*beta**2-6*beta+71)-((3.5**beta)*((-4*beta**2)/3-4*beta+(286/3))+(1.5**beta)*((-4*beta**2)/3-4*beta+(46/3)))
-        B_R_Min[0,1]=((1.5)**beta)*(-2*beta**2-6*beta+23)-(2.5**beta)*((-4*beta**2)/3-4*beta+142/3)+(3.5**beta)*((-beta**2)/3-beta+143/6)
-        B_R_Min[1,1]=((2.5)**beta)*((-beta**2)/3-beta+71/6)-(1.5**beta)*((-4*beta**2)/3-4*beta+46/3)+(.5**beta)*(-2*beta**2-6*beta-1)
+        B_R_Min[0,1]=(3.5**beta)*((-beta**2)/3-beta+143/6)+(1.5**beta)*(-2*beta**2-6*beta+23)-(2.5**beta)*((-4*beta**2)/3-4*beta+142/3)
+        B_R_Min[1,1]=(2.5**beta)*((-beta**2)/3-beta+(71/6))+(.5**beta)*(-2*beta**2-6*beta-1)-(1.5**beta)*((-4*beta**2)/3-4*beta+46/3)
         B_R_Plus[0,1]=-B_R_Min[1,1]
-        B_R_Min[2,1]=(1.5**beta)*((-beta**2)/3-beta+23/6)-(.5**beta)*((-4*beta**2)/3-4*beta-2/3)
+        B_R_Min[2,1]=(1.5**beta)*((-beta**2)/3-beta+(23/6))-(.5**beta)*((-4*beta**2)/3-4*beta-(2/3))
         B_R_Plus[1,1]=-B_R_Min[2,1]
-        B_R_Min[3,1]=(.5**beta)*((-beta**2)/3-beta-1/6)
+        B_R_Min[3,1]=(.5**beta)*((-beta**2)/3-beta-(1/6))
         B_R_Plus[2,1]=-B_R_Min[3,1]
-        B_R_Min[0,0]=(2.5**beta)*((-beta**2)/3-beta+71/6)-(1.5**beta)*((-4*beta**2)/3-4*beta+46/3)
-        B_R_Min[1,0]=(1.5**beta)*((-beta**2)/3-beta+23/6)-(.5**beta)*((-4*beta**2)/3-4*beta-2/3)
+        B_R_Min[0,0]=(2.5**beta)*((-beta**2)/3-beta+(71/6))-(1.5**beta)*((-4*beta**2)/3-4*beta+(46/3))
+        B_R_Min[1,0]=(1.5**beta)*((-beta**2)/3-beta+(23/6))-(.5**beta)*((-4*beta**2)/3-4*beta-2/3)
         B_R_Plus[0,0]=-B_R_Min[1,0]
-        B_R_Min[2,0]=(.5**beta)*((-beta**2)/3-beta-1/6)
+        B_R_Min[2,0]=(.5**beta)*((-beta**2)/3-beta-(1/6))
         B_R_Plus[1,0]=-B_R_Min[2,0]
         constant=((1-self.gamma)*(h**(beta-1)))/(2*gamma(beta+3))
         K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
-        K_min_diag=constant*diag(K_m_ss_nonlin[:self.N],k=0)
+        K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
         B=cp.matmul(K_plus_diag,B_R_Plus)+cp.matmul(K_min_diag,B_R_Min)
         mempool.free_all_blocks()
         return B
@@ -266,7 +265,7 @@ class StiffMatrix():
 
 b=StiffMatrix(0,1,9,0,1,5,0,.7)
 bb=StiffMatrix(0,1,9,0,1,5,1,.7)
-# print(b.Cubic_Right_Deriv())
+print(b.Cubic_Right_Deriv())
 print(bb.Cubic_Left_Deriv())
 print("x_1.5\n", b.mesh.midpoints())
 print("gamma(beta+3)\n",gamma(3.7))

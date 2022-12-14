@@ -26,7 +26,7 @@ class Force_Matrix():
     def Construct_Right(self):
         beta=.7
         f=np.zeros(self.N)
-        force_r=lambda x: -(((1-x)**(beta-1))/gamma(beta+3))*((beta**3)*(x+1)+(beta**2)*(4*(x**2)+4*x-2)+beta*(6*(x**3)+10*(x**2)-9*x-3)+2*(9*(x**3)-7*(x**2)-4*x+2))
+        force_r=lambda x: (((1-x)**(beta-1))/gamma(beta+3))*((beta**3)*(x+1)+(beta**2)*(4*(x**2)+4*x-2)+beta*(6*(x**3)+10*(x**2)-9*x-3)+2*(9*(x**3)-7*(x**2)-4*x+2))
         for i in range(self.N):
             f[i],_=integrate.quad(force_r,self.mid[i],self.mid[i+1])
         f=cp.array(f)

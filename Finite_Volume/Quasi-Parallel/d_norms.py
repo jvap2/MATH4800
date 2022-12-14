@@ -51,6 +51,12 @@ def Left_True_Solution(x_mesh):
     u=u_true(x_mesh)
     return u
 
+def Right_True_Solution(x_mesh):
+    u_true=lambda x: x**3-x**2
+    u=u_true(x_mesh)
+    return u
+
+
 def Norm_SS(x_vector,y_vector):
     int_inf=0
     int_inf_temp=0
@@ -59,3 +65,12 @@ def Norm_SS(x_vector,y_vector):
         if(int_inf_temp>int_inf):
             int_inf=int_inf_temp
     return int_inf
+
+def Norm_SS_Right(x_vector,y_vector):
+    int_inf=0
+    int_inf_temp=0
+    for i in range(len(x_vector)):
+        int_inf_temp=abs(y_vector[i]-Right_True_Solution(x_vector[i]))
+        if(int_inf_temp>int_inf):
+            int_inf=int_inf_temp
+    return int_inf 
