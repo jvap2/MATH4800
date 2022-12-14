@@ -209,7 +209,7 @@ class Final_Solution():
         print(u)
         return cp.asnumpy(u)
     def Right_Cubic_Test(self):
-        B=self.stiff.Cubic_Right_Deriv()
+        B=self.stiff.Cubic_Right_Test()
         f=self.force.Construct_Right()
         u=cp.linalg.solve(-B,f)
         return cp.asnumpy(u)
