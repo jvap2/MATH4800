@@ -2,7 +2,7 @@ import cupy as cp
 
 
 class Mesh():
-    def __init__(self,a,b,N,t_0,t_m,M):
+    def __init__(self,a,b,N,t_0=0,t_m=0,M=0):
         '''
         Mesh class will return our sandbox of data w.r.t x
         @param a: lower boundary

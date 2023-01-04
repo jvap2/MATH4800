@@ -39,7 +39,7 @@ class Controller():
         beta=float(self.view.beta.get())
         theta=float(self.view.theta.get())
         mesh=Mesh(a,b,N,t_0,t_m,M)
-        sol=Final_Solution(a,b,N,t_0,t_m,M,gamma,beta,theta)
+        sol=Final_Solution(a,b,gamma,beta,N,t_0,t_m,M,theta)
         u=np.zeros((mesh.NumofSubIntervals()+2,M+1))
         u_cgs=np.zeros((mesh.NumofSubIntervals()+2,M+1))
         u_true=np.zeros((mesh.NumofSubIntervals()+2))

@@ -21,10 +21,10 @@ from numba.cuda import stream
 
 
 class Final_Solution():
-    def __init__(self,a,b,N,t_0,t_m,M,gamma,beta,theta):
+    def __init__(self,a,b,gamma,beta,N,t_0=0,t_m=0,M=0,theta=0):
         self.mass=MassMatrix(a,b,N,t_0, t_m,M)
         self.force=Force_Matrix(a,b,N,t_0,t_m,M)
-        self.stiff=StiffMatrix(a,b,N,t_0,t_m,M,gamma,beta)
+        self.stiff=StiffMatrix(a,b,N,gamma,beta,t_0,t_m,M)
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
         self.theta=theta
         self.N=N

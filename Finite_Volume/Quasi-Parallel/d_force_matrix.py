@@ -7,7 +7,7 @@ import numpy as np
 
 
 class Force_Matrix():
-    def __init__(self,a,b,N,t_0,t_m,M):
+    def __init__(self,a,b,N,t_0=0,t_m=0,M=0):
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
         self.N=N
         self.mid=cp.asnumpy(self.mesh.midpoints())

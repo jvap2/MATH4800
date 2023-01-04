@@ -10,7 +10,7 @@ from d_mesh import Mesh
 
 
 class StiffMatrix():
-    def __init__(self,a,b,N,t_0,t_m,M,gamma,beta):
+    def __init__(self,a,b,N,gamma,beta,t_0=0,t_m=0,M=0):
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
         self.gamma=gamma
         self.beta=beta
