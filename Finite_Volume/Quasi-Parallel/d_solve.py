@@ -173,20 +173,22 @@ class Final_Solution():
         u=cp.zeros((self.N,self.M+1))
         M_1=self.mass.Construct_Prob_1()
         M=self.mass.Construct_Cubic()
-        B_l=self.stiff.Cubic_Left_Deriv()
+        B_L=self.stiff.Cubic_Left_Deriv()
+        B_R=self.stiff.Cubic_Right_Test()
+        B=B_L+B_R
         F=self.force.Construct()
         u[:,0]=u_0
         start=time.time()
-        b=cp.matmul((M_1+(1-self.theta)*self.mesh.delta_t()*B_l),u[:,0])+self.mesh.delta_t()*F
-        A=csc_matrix(M-(self.theta)*self.mesh.delta_t()*B_l)
+        b=cp.matmul((M_1+(1-self.theta)*self.mesh.delta_t()*B),u[:,0])+self.mesh.delta_t()*F
+        A=csc_matrix(M-(self.theta)*self.mesh.delta_t()*B)
         x,exit_code=linalg.cgs(A,b)
         if exit_code !=0:
             print("Failed convergence")
         else:
             u[:,1]=x
         for (i,t) in enumerate(self.mesh.time()[2:]):
-            b=cp.matmul((M+(1-self.theta)*self.mesh.delta_t()*B_l),u[:,i+1])+self.mesh.delta_t()*F
-            A=csc_matrix(M-(self.theta)*self.mesh.delta_t()*B_l)
+            b=cp.matmul((M+(1-self.theta)*self.mesh.delta_t()*B),u[:,i+1])+self.mesh.delta_t()*F
+            A=csc_matrix(M-(self.theta)*self.mesh.delta_t()*B)
             x,exit_code=linalg.cgs(A,b)
             if exit_code !=0:
                 print("Failed convergence")
