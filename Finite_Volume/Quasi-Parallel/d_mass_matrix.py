@@ -38,11 +38,11 @@ class MassMatrix():
         return M
     def Construct_Cubic(self):
         h=self.mesh.silengths()[0]
-        middle_diag=cp.ones(self.N)*.807292*h
-        one_off_diag=cp.ones(self.N-1)*.1145835*h
-        two_off_diag=cp.ones(self.N-2)*(-.0182292*h)
-        M=cp.diag(middle_diag,k=0)+cp.diag(one_off_diag,k=1)+cp.diag(one_off_diag,k=-1)+\
-            cp.diag(two_off_diag,k=2)+cp.diag(two_off_diag,k=-2)
+        m=cp.ones(shape=self.N)*(155*h/192)
+        off_1=cp.empty(shape=self.N-1)*(.1145825*h)
+        off_2=cp.empty(shape=self.N-2)*(-.01823*h)
+        M=cp.diag(m,k=0)+cp.diag(off_1,k=1)+cp.diag(off_1,k=-1)+\
+            cp.diag(off_2,k=2)+cp.diag(off_2,k=-2)
         return M
 
 

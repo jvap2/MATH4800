@@ -357,18 +357,11 @@ class StiffMatrix():
 
 
 
-b=StiffMatrix(0,1,65,0,1,5,0,.7)
+b=StiffMatrix(0,1,9,0,1,5,0,.7)
 
 bad=b.Cubic_Right_Deriv()
 good=b.Cubic_Right_Test()
-count=0
-for i in range(65):
-    for j in range(65):
-        err=abs(bad[i,j]-good[i,j])
-        if(err>1e-14):
-            count+=1
-
-print(count)
+print(bad-good)
 
 
 print("x_1.5\n", b.mesh.midpoints())
