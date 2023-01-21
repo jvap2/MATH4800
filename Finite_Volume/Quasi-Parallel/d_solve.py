@@ -1,5 +1,4 @@
 from ast import arg
-from re import M
 from d_mass_matrix import MassMatrix
 from d_force_matrix import Force_Matrix
 from d_stiff_matrix import StiffMatrix
@@ -73,11 +72,12 @@ class Final_Solution():
         u_0=self.u_zero_1()
         u=cp.zeros((self.N,self.M+1),dtype=cp.float16)
         u[:,0]=u_0
+        F=self.force.Construct_Time()
         for (i,t) in enumerate(self.mesh.time()[1:]):
             if i==0:
-                b=cp.matmul((self.mass.Construct_Prob_1()+(1-self.theta)*self.mesh.delta_t()*self.stiff.B(self.mesh.time()[i])),u[:,i], dtype=cp.float16)+self.mesh.delta_t()*self.force.Construct()
+                b=cp.matmul((self.mass.Construct_Prob_1()+(1-self.theta)*self.mesh.delta_t()*self.stiff.B(self.mesh.time()[i])),u[:,i], dtype=cp.float16)+self.mesh.delta_t()*F
             else:
-                b=cp.matmul((self.mass.Construct()+(1-self.theta)*self.mesh.delta_t()*self.stiff.B(self.mesh.time()[i])),u[:,i], dtype=cp.float16)+self.mesh.delta_t()*self.force.Construct()
+                b=cp.matmul((self.mass.Construct()+(1-self.theta)*self.mesh.delta_t()*self.stiff.B(self.mesh.time()[i])),u[:,i], dtype=cp.float16)+self.mesh.delta_t()*F
             A=(self.mass.Construct()-(self.theta)*self.mesh.delta_t()*self.stiff.B(t))
             u[:,i+1]=cp.matmul(cp.linalg.inv(A),b)
             if(i%10==0):
@@ -169,14 +169,14 @@ class Final_Solution():
         return u_return, parareal_time
     def Solve_Cubic_1(self):
         mempool = cp.get_default_memory_pool()
-        u_0=self.u_zero(self.mesh.mesh_points()[1:-1])
+        u_0=self.u_zero_1()
         u=cp.zeros((self.N,self.M+1))
         M_1=self.mass.Construct_Prob_1()
         M=self.mass.Construct_Cubic()
         B_L=self.stiff.Cubic_Left_Deriv()
         B_R=self.stiff.Cubic_Right_Test()
         B=B_L+B_R
-        F=self.force.Construct()
+        F=self.force.Construct_Time()
         u[:,0]=u_0
         start=time.time()
         b=cp.matmul((M_1+(1-self.theta)*self.mesh.delta_t()*B),u[:,0])+self.mesh.delta_t()*F
@@ -294,6 +294,34 @@ class Final_Solution():
         u_return=cp.asnumpy(u)
         mempool.free_all_blocks()
         return u_return,parareal_time
+    def MatInv_Cubic(self):
+        mempool = cp.get_default_memory_pool()
+        u_0=self.u_zero_1()
+        u=cp.zeros((self.N,self.M+1))
+        M_1=self.mass.Construct_Prob_1()
+        M=self.mass.Construct_Cubic()
+        B_L=self.stiff.Cubic_Left_Deriv()
+        B_R=self.stiff.Cubic_Right_Test()
+        B=B_L+B_R
+        F=self.force.Construct_Time()
+        u[:,0]=u_0
+        start=time.time()
+        b=cp.matmul((M_1+(1-self.theta)*self.mesh.delta_t()*B),u[:,0])+self.mesh.delta_t()*F
+        A=(M-(self.theta)*self.mesh.delta_t()*B)
+        u[:,1]=cp.matmul(cp.linalg.inv(A),b)
+        for (i,t) in enumerate(self.mesh.time()[2:]):
+            b=cp.matmul((M+(1-self.theta)*self.mesh.delta_t()*B),u[:,i+1])+self.mesh.delta_t()*F
+            A=(M-(self.theta)*self.mesh.delta_t()*B)
+            u[:,i+2]=cp.matmul(cp.linalg.inv(A),b)
+        end=time.time()
+        time_total=end-start
+        u_return=cp.asnumpy(u)
+        print(f"Used bytes before: {mempool.used_bytes()}")
+        print(f"Total_bytes before: {mempool.total_bytes()}")
+        mempool.free_all_blocks()
+        print(f"Used bytes after: {mempool.used_bytes()}")
+        print(f"Total_bytes after: {mempool.total_bytes()}")
+        return u_return
     
 @cuda.jit
 def Fine_Propogator(M,u,u_fine,m,N):

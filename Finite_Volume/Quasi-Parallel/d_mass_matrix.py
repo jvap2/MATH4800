@@ -39,10 +39,15 @@ class MassMatrix():
     def Construct_Cubic(self):
         h=self.mesh.silengths()[0]
         m=cp.ones(shape=self.N)*(155*h/192)
-        off_1=cp.empty(shape=self.N-1)*(.1145825*h)
-        off_2=cp.empty(shape=self.N-2)*(-.01823*h)
+        off_1=cp.ones(shape=self.N-1)*(.1145825*h)
+        off_2=cp.ones(shape=self.N-2)*(-.01823*h)
         M=cp.diag(m,k=0)+cp.diag(off_1,k=1)+cp.diag(off_1,k=-1)+\
             cp.diag(off_2,k=2)+cp.diag(off_2,k=-2)
         return M
-
+    def Construct_Cubic_Lump(self):
+        h=self.mesh.silengths()[0]
+        const=(155*h/192)+(.1145825*h)+(-.01823*h)
+        m=cp.ones(shape=self.N)*const
+        M=cp.diag(m,k=0)
+        return M
 

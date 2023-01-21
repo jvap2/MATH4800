@@ -59,7 +59,6 @@ class StiffMatrix():
         K_m=cp.zeros(self.N+1)
         K_m=coeff(x=self.mid[0:self.N+1],t=t)
         k_left_non_lin=lambda x: 1+x
-        K_m_ss=cp.ones(self.N+1)
         K_m_ss_nonlin=k_left_non_lin(self.mid[0:])
         col_linspace=cp.linspace(3,self.N-1, self.N-3)
         j=cp.linspace(3,self.N, self.N-2)
@@ -137,8 +136,8 @@ class StiffMatrix():
         B_L_Plus[self.N-4,self.N-2]=-B_L_Min[self.N-3,self.N-2]
         B_L_Plus[self.N-1,self.N-3]=((3.5)**beta)*(4*(beta**2)/3+4*beta-(286/3))+((1.5)**beta)*(4*(beta**2)/3+4*beta-46/3)-((4.5**beta)*((beta**2)/3+beta-(239/6))+(2.5**beta)*(2*(beta**2)+6*beta-71))
         constant=(self.gamma*(h**(beta-1)))/(2*gamma(beta+3))
-        K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
-        K_min_diag=constant*diag(K_m_ss_nonlin[:self.N],k=0)
+        K_plus_diag=constant*diag(K_m_1[1:],k=0)
+        K_min_diag=constant*diag(K_m_1[:self.N],k=0)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
         return B
     def Cubic_Right_Deriv(self):
@@ -240,7 +239,6 @@ class StiffMatrix():
         K_m=cp.zeros(self.N+1)
         # K_m=coeff(x=self.mid[0:self.N+1],t=t)
         k_left_non_lin=lambda x: 1+x
-        K_m_ss=cp.ones(self.N+1)
         K_m_ss_nonlin=k_left_non_lin(self.mid[0:])
         col_linspace=cp.linspace(3,self.N-1, self.N-3)
         j=cp.linspace(3,self.N, self.N-2)
@@ -320,14 +318,14 @@ class StiffMatrix():
         B_R_Plus=cp.rot90(B_L_Min,2)
         B_R_Min=cp.rot90(B_L_Plus,2)
         constant=((1-self.gamma)*(h**(beta-1)))/(2*gamma(beta+3))
-        K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
-        K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
+        K_plus_diag=constant*diag(K_m_1[1:],k=0)
+        K_min_diag=constant*diag(K_m_1[:N],k=0)
         B=cp.matmul(K_plus_diag,B_R_Plus)+cp.matmul(K_min_diag,B_R_Min)
         return B
     def Linear_Left_Deriv(self):
         n=cp.linspace(2,self.N-1, self.N-2)
         k_left_non_lin=lambda x: 1+x
-        K_m_ss=cp.ones(self.N+1)
+        K_m_ss=cp.ones(self.N+1)*.01
         K_m_ss_nonlin=k_left_non_lin(self.mesh.midpoints())
         col_plus,row_plus=cp.zeros(shape=(self.N)),cp.zeros(shape=(self.N))
         col_min,row_min=cp.zeros(shape=(self.N)),cp.zeros(shape=(self.N))
@@ -341,36 +339,37 @@ class StiffMatrix():
         col_plus[2:]=(-2*((n+.5)**self.beta)+((n+1.5)**self.beta)+((n-.5)**self.beta))
         col_min[2:]=(2*((n-.5)**self.beta)-((n+.5)**self.beta)-((n-1.5)**self.beta))
         const=self.gamma/(gamma(self.beta+1)*self.h[0]**(1-self.beta))
-        K_plus_diag=const*diag(K_m_ss_nonlin[1:],k=0)
-        K_min_diag=const*diag(K_m_ss_nonlin[:self.N],k=0)
+        K_plus_diag=const*diag(K_m_ss[1:],k=0)
+        K_min_diag=const*diag(K_m_ss[:self.N],k=0)
         B_L_Plus=toeplitz(c=col_plus,r=row_plus)
         B_L_Min=toeplitz(c=col_min,r=row_min)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
         return B
     def Linear_Right_Deriv(self):
-        lin=cp.linspace(2,self.N-1,self.N-2)
-        row_p=cp.empty(self.N)
-        row_m=cp.empty(self.N)
-        col_p=cp.empty(self.N)
-        col_m=cp.empty(self.N)
-        row_p[2:]=(2*(lin-.5)**self.beta)-((lin-1.5)**self.beta)-((-lin+.5)**self.beta)
-        row_m[2:]=(-2*(lin+.5)**self.beta)-((lin-.5)**self.beta)-((-lin+1.5)**self.beta)
-        row_p[1]=(2*(.5)**self.beta)-(1.5)**self.beta
-        row_m[1]=(-2*(1.5)**self.beta+.5**self.beta+2.5**self.beta)
-        row_p[0]=-(.5)**self.beta
-        row_m[0]=-2*(.5**self.beta)+(1.5)**self.beta
-        col_p[0],col_m[0]=row_p[0],col_m[0]
-        col_m[1]=(.5)**self.beta
+        n=cp.linspace(2,self.N-1, self.N-2)
+        k_left_non_lin=lambda x: 1+x
+        K_m_ss=cp.ones(self.N+1)*.01
+        K_m_ss_nonlin=k_left_non_lin(self.mesh.midpoints())
+        col_plus,row_plus=cp.zeros(shape=(self.N)),cp.zeros(shape=(self.N))
+        col_min,row_min=cp.zeros(shape=(self.N)),cp.zeros(shape=(self.N))
+        col_plus[0]=(-2*(.5**self.beta)+(1.5)**self.beta)
+        row_plus[0]=(-2*(.5**self.beta)+(1.5)**self.beta)
+        row_plus[1]=(.5)**self.beta
+        col_min[0]=-(.5)**self.beta
+        row_min[0]=-(.5)**self.beta
+        col_plus[1]=(-2*(1.5**self.beta)+(2.5**self.beta)+(.5**self.beta))
+        col_min[1]=-(-2*(.5**self.beta)+(1.5**self.beta))
+        col_plus[2:]=(-2*((n+.5)**self.beta)+((n+1.5)**self.beta)+((n-.5)**self.beta))
+        col_min[2:]=(2*((n-.5)**self.beta)-((n+.5)**self.beta)-((n-1.5)**self.beta))
+        B_L_Plus=toeplitz(c=col_plus,r=row_plus)
+        B_L_Min=toeplitz(c=col_min,r=row_min)
         const=(1-self.gamma)/(gamma(self.beta+1)*self.h[0]**(1-self.beta))
         K_p,K_m=cp.empty(shape=(self.N,self.N)),cp.empty(shape=(self.N,self.N))
-        k_left_non_lin=lambda x: 1+x
-        K_m_ss=cp.ones(self.N+1)
-        K_m_ss_nonlin=k_left_non_lin(self.mesh.midpoints())
-        K_plus_diag=const*diag(K_m_ss_nonlin[1:],k=0)
-        K_min_diag=const*diag(K_m_ss_nonlin[:self.N],k=0)
-        B_L_Plus=toeplitz(c=col_p,r=row_p)
-        B_L_Min=toeplitz(c=col_m,r=row_m)
-        B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
+        K_p=const*diag(K_m_ss[1:],k=0)
+        K_m=const*diag(K_m_ss[:self.N],k=0)
+        B_R_Plus=cp.rot90(B_L_Min,2)
+        B_R_Min=cp.rot90(B_L_Plus,2)
+        B=cp.matmul(K_p,B_R_Plus)+cp.matmul(K_m,B_R_Min)
         return B
 
 

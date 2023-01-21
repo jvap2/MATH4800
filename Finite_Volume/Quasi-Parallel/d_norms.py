@@ -40,10 +40,12 @@ def Norm_Time(x_vector,y_approx):
     int_L2=math.sqrt(int_L2)
     return int_L2,int_inf
 
-def True_Solution(x,t):
-    u_true= lambda ep,x,t: math.exp(-.01*t*math.cos(math.pi/10)*(ep**1.8))*math.cos(x*ep)
-    int=(1/math.pi)*(quad(u_true,0,10**3,args=(x,t))[0]+quad(u_true,10**3,10**6,args=(x,t))[0]+quad(u_true,10**6,10**7,args=(x,t))[0]\
-        +quad(u_true, 10**7,10**8, args=(x,t))[0]+quad(u_true,10**8,np.inf,args=(x,t))[0])
+def True_Solution(x_sol):
+    u_true= lambda ep,x: math.exp(-.01*math.cos(math.pi/10)*(ep**1.8))*math.cos(x*ep)
+    int=np.empty(shape=(len(x_sol)))
+    for (i,point) in enumerate(x_sol):
+        int[i]=(1/math.pi)*(quad(u_true,0,10**4,args=(point))[0])+(1/math.pi)*(quad(u_true,10**4,10**8,args=(point))[0])+\
+            (1/math.pi)*(quad(u_true,10**8,10**12,args=(point))[0])+(1/math.pi)*(quad(u_true,10**12,10**16,args=(point))[0])
     return int
 
 def Left_True_Solution(x_mesh):
@@ -60,8 +62,9 @@ def Right_True_Solution(x_mesh):
 def Norm_SS(x_vector,y_vector):
     int_inf=0
     int_inf_temp=0
+    true=True_Solution(x_vector)
     for i in range(len(x_vector)):
-        int_inf_temp=abs(y_vector[i]-Left_True_Solution(x_vector[i]))
+        int_inf_temp=abs(y_vector[i]-true[i])
         if(int_inf_temp>int_inf):
             int_inf=int_inf_temp
     return int_inf
