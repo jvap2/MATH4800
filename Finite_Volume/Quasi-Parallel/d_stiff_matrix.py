@@ -224,8 +224,8 @@ class StiffMatrix():
         B_R_Min[2,0]=(.5**beta)*((-beta**2)/3-beta-(1/6))
         B_R_Plus[1,0]=-B_R_Min[2,0]
         constant=((1-self.gamma)*(h**(beta-1)))/(2*gamma(beta+3))
-        K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
-        K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
+        K_plus_diag=constant*diag(K_m_1[1:],k=0)
+        K_min_diag=constant*diag(K_m_1[:N],k=0)
         B=cp.matmul(K_plus_diag,B_R_Plus)+cp.matmul(K_min_diag,B_R_Min)
         mempool.free_all_blocks()
         return B
@@ -374,7 +374,8 @@ class StiffMatrix():
 
 
 
-
-
+B=StiffMatrix(0,1,128,0,.7)
+B_R_Deriv=B.Cubic_Right_Deriv()
+B_R_Rot=B.Cubic_Right_Test()
 
 
