@@ -14,6 +14,9 @@ from scipy.linalg import norm
 import numba
 from numba import cuda
 from numba.cuda import stream
+import d_cgs
+from d_cgs import B_1_Cubic_Left,B_2_Cubic_Left,B_3_Cubic_Left
+from d_cgs import B_1_Cubic_Right, B_2_Cubic_Right, B_3_Cubic_Right
 
 
 
@@ -26,7 +29,10 @@ class Final_Solution():
         self.stiff=StiffMatrix(a,b,N,gamma,beta,t_0,t_m,M)
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
         self.theta=theta
+        self.h=self.mesh.silengths()[0]
         self.N=N
+        self.gamma=gamma
+        self.beta=beta
         self.M=M
     def u_zero(self,x,t=0):
         return cp.exp(-(x-1)**2/(2*.08**2))
@@ -215,6 +221,50 @@ class Final_Solution():
         f=self.force.Construct_Right()
         u=cp.linalg.solve(-B,f)
         return cp.asnumpy(u)
+    def Right_Cubic_CGS(self):
+        B_1=B_1_Cubic_Right(self.N,self.gamma,self.beta,self.h)
+        B_2=B_2_Cubic_Right(self.N,self.gamma,self.beta,self.h)
+        B_3=B_3_Cubic_Right(self.N,self.gamma,self.beta,self.h)
+        b=self.force.Construct_Right()
+        r_0_star=cp.random.rand((self.N))
+        x=cp.random.rand((self.N))
+        r=b-(B_1.matvec(x[:3])+B_2.matvec(x[3:self.N-2])+B_3.matvec(x[self.N-3:]))
+        p,u=r,r
+        norm=10
+        while norm>=1e-7:
+            alpha=cp.dot(r,r_0_star)/cp.dot((B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:])),r_0_star)
+            q=u-alpha*(B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:]))
+            x=x+alpha*(u+q)
+            r_new=r-alpha*(B_1.matvec(u[:3]+q[:3])+B_2.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3.matvec(u[self.N-3:]+q[self.N-3:]))
+            beta=cp.dot(r_new,r_0_star)/cp.dot(r,r_0_star)
+            r=r_new
+            u=r+beta*q
+            p=u+beta*(q+beta*p)
+            norm=cp.linalg.norm(r)
+        x=cp.asnumpy(x)
+        return x
+    def Left_Cubic_CGS(self):
+        B_1=B_1_Cubic_Left(self.N,self.gamma,self.beta,self.h)
+        B_2=B_2_Cubic_Left(self.N,self.gamma,self.beta,self.h)
+        B_3=B_3_Cubic_Left(self.N,self.gamma,self.beta,self.h)
+        b=self.force.Construct()
+        r_0_star=cp.random.rand((self.N))
+        x=cp.random.rand((self.N))
+        r=b-(B_1.matvec(x[:3])+B_2.matvec(x[3:self.N-2])+B_3.matvec(x[self.N-3:]))
+        p,u=r,r
+        norm=10
+        while norm>=1e-7:
+            alpha=cp.dot(r,r_0_star)/cp.dot((B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:])),r_0_star)
+            q=u-alpha*(B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:]))
+            x=x+alpha*(u+q)
+            r_new=r-alpha*(B_1.matvec(u[:3]+q[:3])+B_2.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3.matvec(u[self.N-3:]+q[self.N-3:]))
+            beta=cp.dot(r_new,r_0_star)/cp.dot(r,r_0_star)
+            r=r_new
+            u=r+beta*q
+            p=u+beta*(q+beta*p)
+            norm=cp.linalg.norm(r)
+        x=cp.asnumpy(x)
+        return x
     def Steady_State_Linear(self):
         f=self.force.Construct()
         B=self.stiff.Linear_Left_Deriv()
@@ -333,3 +383,5 @@ def Fine_Propogator(M,u,u_fine,m,N):
         u_fine[row,col]=fSum
 
 
+s=Final_Solution(0,1,0,.7,64)
+s.Right_Cubic_CGS()

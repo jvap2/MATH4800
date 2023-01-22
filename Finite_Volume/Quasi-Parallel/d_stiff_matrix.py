@@ -140,6 +140,7 @@ class StiffMatrix():
         K_min_diag=constant*diag(K_m_1[:self.N],k=0)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
         return B
+        
     def Cubic_Right_Deriv(self):
         mempool = cp.get_default_memory_pool()
         beta=self.beta

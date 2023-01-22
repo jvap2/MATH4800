@@ -38,7 +38,7 @@ class Controller():
         sol=Final_Solution(a,b,gamma,beta,N)
         u_cub=np.zeros(shape=(mesh.NumofSubIntervals()+2,1))
         u_lin=np.zeros(shape=(mesh.NumofSubIntervals()+2,1))
-        u_cub[1:mesh.NumofSubIntervals()+1,0]=sol.Right_Cubic_Test()
+        u_cub[1:mesh.NumofSubIntervals()+1,0]=sol.Right_Cubic_CGS()
         u_lin[1:mesh.NumofSubIntervals()+1,0]=sol.Linear_Right()
         x_np=cp.asnumpy(mesh.mesh_points())
         u_true=Left_True_Solution(x_np)
