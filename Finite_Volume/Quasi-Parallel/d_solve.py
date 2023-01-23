@@ -15,8 +15,9 @@ import numba
 from numba import cuda
 from numba.cuda import stream
 import d_cgs
-from d_cgs import B_1_Cubic_Left,B_2_Cubic_Left,B_3_Cubic_Left
-from d_cgs import B_1_Cubic_Right, B_2_Cubic_Right, B_3_Cubic_Right
+from cupyx.scipy.sparse.linalg import aslinearoperator
+from d_cgs import B_1_Cubic_Right,B_2_Cubic_Right,B_3_Cubic_Right
+
 
 
 
@@ -34,6 +35,7 @@ class Final_Solution():
         self.gamma=gamma
         self.beta=beta
         self.M=M
+        self.mid=self.mesh.midpoints()
     def u_zero(self,x,t=0):
         return cp.exp(-(x-1)**2/(2*.08**2))
     def u_zero_1(self):
@@ -221,22 +223,21 @@ class Final_Solution():
         f=self.force.Construct_Right()
         u=cp.linalg.solve(-B,f)
         return cp.asnumpy(u)
-    def Right_Cubic_CGS(self):
-        mid=self.mesh.midpoints()
-        B_1=B_1_Cubic_Right(self.N,self.gamma,self.beta,self.h,mid)
-        B_2=B_2_Cubic_Right(self.N,self.gamma,self.beta,self.h,mid)
-        B_3=B_3_Cubic_Right(self.N,self.gamma,self.beta,self.h,mid)
+    def Lin_Op_Right(self):
+        B_1=B_1_Cubic_Right(self.N,self.gamma,self.beta,self.h,self.mid)
+        B_2=B_2_Cubic_Right(self.N,self.gamma,self.beta,self.h,self.mid)
+        B_3=B_3_Cubic_Right(self.N,self.gamma,self.beta,self.h,self.mid)
         b=self.force.Construct_Right()
         r_0=cp.ones(shape=self.N)
         x=cp.zeros(shape=self.N)
-        r=b-(B_1.matvec(x[:3])+B_2.matvec(x[3:self.N-2])+B_3.matvec(x[self.N-3:]))
+        r=b-(-B_1.matvec(x[:3])-B_2.matvec(x[2:self.N-3])-B_3.matvec(x[self.N-3:]))
         p,u=r,r
         norm=5
         while norm>=1e-6:
-            alpha=cp.dot(r,r_0)/cp.dot(B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:]),r_0)
-            q=u-alpha*(B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:]))
+            alpha=cp.dot(r,r_0)/cp.dot(-B_1.matvec(p[:3])-B_2.matvec(p[2:self.N-3])-B_3.matvec(p[self.N-3:]),r_0)
+            q=u-alpha*(-B_1.matvec(p[:3])-B_2.matvec(p[2:self.N-3])-B_3.matvec(p[self.N-3:]))
             x_new=x+alpha*(u+q)
-            r_new=r-alpha*(B_1.matvec(u[:3]+q[:3])+B_2.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3.matvec(u[self.N-3:]+q[self.N-3:]))
+            r_new=r-alpha*(-B_1.matvec(u[:3]+q[:3])-B_2.matvec(u[2:self.N-3]+q[2:self.N-3])-B_3.matvec(u[self.N-3:]+q[self.N-3:]))
             Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
             u=r_new+Beta*q
             p_new=u+Beta*(q+Beta*p)
@@ -245,42 +246,21 @@ class Final_Solution():
             norm=abs(cp.max(x_new-x))
             x=x_new
         x=cp.asnumpy(x)
-    def Left_Cubic_CGS(self):
-        B_1=B_1_Cubic_Left(self.N,self.gamma,self.beta,self.h)
-        B_2=B_2_Cubic_Left(self.N,self.gamma,self.beta,self.h)
-        B_3=B_3_Cubic_Left(self.N,self.gamma,self.beta,self.h)
-        b=self.force.Construct()
-        r_0_star=cp.random.rand((self.N))
-        x=cp.random.rand((self.N))
-        r=b-(B_1.matvec(x[:3])+B_2.matvec(x[3:self.N-2])+B_3.matvec(x[self.N-3:]))
-        p,u=r,r
-        norm=10
-        while norm>=1e-7:
-            alpha=cp.dot(r,r_0_star)/cp.dot((B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:])),r_0_star)
-            q=u-alpha*(B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:]))
-            x=x+alpha*(u+q)
-            r_new=r-alpha*(B_1.matvec(u[:3]+q[:3])+B_2.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3.matvec(u[self.N-3:]+q[self.N-3:]))
-            beta=cp.dot(r_new,r_0_star)/cp.dot(r,r_0_star)
-            r=r_new
-            u=r+beta*q
-            p=u+beta*(q+beta*p)
-            norm=cp.linalg.norm(r)
-        x=cp.asnumpy(x)
         return x
     def Test_CGS(self):
         Stiff=self.stiff.Cubic_Right_Test()
-        B=-Stiff
+        B=aslinearoperator(-Stiff)
         b=self.force.Construct_Right()
         r_0=cp.ones(shape=self.N)
         x=cp.zeros(shape=self.N)
-        r=b-cp.matmul(B,x)
+        r=b-B.matvec(x)
         p,u=r,r
         norm=5
         while norm>=1e-6:
-            alpha=cp.dot(r,r_0)/cp.dot(cp.matmul(B,p),r_0)
-            q=u-alpha*(cp.matmul(B,p))
+            alpha=cp.dot(r,r_0)/cp.dot(B.matvec(p),r_0)
+            q=u-alpha*(B.matvec(p))
             x_new=x+alpha*(u+q)
-            r_new=r-alpha*(cp.matmul(B,u+q))
+            r_new=r-alpha*(B.matvec(u+q))
             Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
             u=r_new+Beta*q
             p_new=u+Beta*(q+Beta*p)
