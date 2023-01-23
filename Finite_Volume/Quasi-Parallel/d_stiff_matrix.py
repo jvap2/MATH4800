@@ -140,7 +140,7 @@ class StiffMatrix():
         K_min_diag=constant*diag(K_m_1[:self.N],k=0)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
         return B
-        
+
     def Cubic_Right_Deriv(self):
         mempool = cp.get_default_memory_pool()
         beta=self.beta
@@ -319,8 +319,8 @@ class StiffMatrix():
         B_R_Plus=cp.rot90(B_L_Min,2)
         B_R_Min=cp.rot90(B_L_Plus,2)
         constant=((1-self.gamma)*(h**(beta-1)))/(2*gamma(beta+3))
-        K_plus_diag=constant*diag(K_m_1[1:],k=0)
-        K_min_diag=constant*diag(K_m_1[:N],k=0)
+        K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
+        K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
         B=cp.matmul(K_plus_diag,B_R_Plus)+cp.matmul(K_min_diag,B_R_Min)
         return B
     def Linear_Left_Deriv(self):

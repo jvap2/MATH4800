@@ -10,7 +10,7 @@ from d_mesh import Mesh
 import math
 
 
-def B_1_Cubic_Left(N,gamma,beta,h):
+def B_1_Cubic_Left(N,gamma,beta,h,x=0):
     j=cp.linspace(3,N,N-2)
     j_1=cp.linspace(4,N,N-3)
     j_2=cp.linspace(5,N,N-4)
@@ -54,7 +54,9 @@ def B_1_Cubic_Left(N,gamma,beta,h):
     B=aslinearoperator(B)
     return B
 
-def B_1_Cubic_Right(N,gamma,beta,h):
+def B_1_Cubic_Right(N,gamma,beta,h, x=0):
+    k_left_non_lin=lambda x: 1+x
+    K_m_ss_nonlin=k_left_non_lin(x)
     K_m_1=cp.ones(N+1)*.01
     B_R_Min=cp.empty(shape=(N,3))
     B_R_Plus=cp.empty(shape=(N,3))
@@ -72,14 +74,16 @@ def B_1_Cubic_Right(N,gamma,beta,h):
     B_R_Min[2,0]=(.5**beta)*((-beta**2)/3-beta-(1/6))
     B_R_Plus[1,0]=-B_R_Min[2,0]
     constant=((1-gamma)*(h**(beta-1)))/(2*math.gamma(beta+3))
-    K_plus_diag=constant*diag(K_m_1[1:],k=0)
-    K_min_diag=constant*diag(K_m_1[:N],k=0)
+    K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
+    K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
     B=cp.matmul(K_plus_diag,(-1)*B_R_Plus)+cp.matmul(K_min_diag,(-1)*B_R_Min)
     B=aslinearoperator(B)
     return B
 
 
-def B_3_Cubic_Right(N,gamma,beta,h):
+def B_3_Cubic_Right(N,gamma,beta,h, x=0):
+    k_left_non_lin=lambda x: 1+x
+    K_m_ss_nonlin=k_left_non_lin(x)
     B_R_Min=cp.zeros(shape=(N,3))
     B_R_Plus=cp.zeros(shape=(N,3))
     j=cp.linspace(1,N-3,N-3)
@@ -121,13 +125,13 @@ def B_3_Cubic_Right(N,gamma,beta,h):
     B_R_Min[N-4,0]=-((.5)**beta)*((-4*beta**2)/3-4*beta-(2/3))+(1.5**beta)*(-2*beta**2-6*beta+23)-(2.5**beta)*((-4*beta**2)/3-4*beta+142/3)+(4.5**beta)*((2*beta**2)/3-7*beta+143/6)
     B_R_Plus[N-5,0]=-B_R_Min[N-4,0]
     constant=(gamma*(h**(beta-1)))/(2*math.gamma(beta+3))
-    K_plus_diag=constant*diag(K_m_1[1:],k=0)
-    K_min_diag=constant*diag(K_m_1[:N],k=0)
+    K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
+    K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
     B=cp.matmul(K_plus_diag,(-1)*B_R_Plus)+cp.matmul(K_min_diag,(-1)*B_R_Min)
     B=aslinearoperator(B)
     return B
 
-def B_3_Cubic_Left(N,gamma,beta,h):
+def B_3_Cubic_Left(N,gamma,beta,h, x=0):
     K_m_1=cp.ones(N+1)*.01
     B_L_Min=cp.zeros(shape=(N,3))
     B_L_Plus=cp.zeros(shape=(N,3))
@@ -154,7 +158,7 @@ def B_3_Cubic_Left(N,gamma,beta,h):
     return B
 
 
-def B_2_Cubic_Left(N,gamma,beta,h):
+def B_2_Cubic_Left(N,gamma,beta,h, x=0):
     K_m_1=cp.ones(N+1)*.01
     col_linspace=cp.linspace(3,N-4, N-6)
     col_L_min=cp.zeros(shape=N-6)
@@ -186,7 +190,9 @@ def B_2_Cubic_Left(N,gamma,beta,h):
     B=aslinearoperator(B)
     return B
 
-def B_2_Cubic_Right(N,gamma,beta,h):
+def B_2_Cubic_Right(N,gamma,beta,h,x=0):
+    k_left_non_lin=lambda x: 1+x
+    K_m_ss_nonlin=k_left_non_lin(x)
     K_m_1=cp.ones(N+1)*.01
     q=cp.linspace(-2,-(N-4), N-5)
     col_R_min=cp.zeros(shape=N-5)
@@ -210,8 +216,8 @@ def B_2_Cubic_Right(N,gamma,beta,h):
     print(cp.shape(B_R_Min))
     print(cp.shape(B_R_Plus))
     constant=(gamma*(h**(beta-1)))/(2*math.gamma(beta+3))
-    K_plus_diag=constant*diag(K_m_1[1:],k=0)
-    K_min_diag=constant*diag(K_m_1[:N],k=0)
+    K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
+    K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
     print(cp.shape(K_plus_diag))
     print(cp.shape(K_min_diag))
     B=cp.matmul(K_plus_diag,B_R_Plus)+cp.matmul(K_min_diag,B_R_Min)

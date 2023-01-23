@@ -222,27 +222,29 @@ class Final_Solution():
         u=cp.linalg.solve(-B,f)
         return cp.asnumpy(u)
     def Right_Cubic_CGS(self):
-        B_1=B_1_Cubic_Right(self.N,self.gamma,self.beta,self.h)
-        B_2=B_2_Cubic_Right(self.N,self.gamma,self.beta,self.h)
-        B_3=B_3_Cubic_Right(self.N,self.gamma,self.beta,self.h)
+        mid=self.mesh.midpoints()
+        B_1=B_1_Cubic_Right(self.N,self.gamma,self.beta,self.h,mid)
+        B_2=B_2_Cubic_Right(self.N,self.gamma,self.beta,self.h,mid)
+        B_3=B_3_Cubic_Right(self.N,self.gamma,self.beta,self.h,mid)
         b=self.force.Construct_Right()
-        r_0_star=cp.random.rand((self.N))
-        x=cp.random.rand((self.N))
+        r_0=cp.ones(shape=self.N)
+        x=cp.zeros(shape=self.N)
         r=b-(B_1.matvec(x[:3])+B_2.matvec(x[3:self.N-2])+B_3.matvec(x[self.N-3:]))
         p,u=r,r
-        norm=10
-        while norm>=1e-7:
-            alpha=cp.dot(r,r_0_star)/cp.dot((B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:])),r_0_star)
+        norm=5
+        while norm>=1e-6:
+            alpha=cp.dot(r,r_0)/cp.dot(B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:]),r_0)
             q=u-alpha*(B_1.matvec(p[:3])+B_2.matvec(p[3:self.N-2])+B_3.matvec(p[self.N-3:]))
-            x=x+alpha*(u+q)
+            x_new=x+alpha*(u+q)
             r_new=r-alpha*(B_1.matvec(u[:3]+q[:3])+B_2.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3.matvec(u[self.N-3:]+q[self.N-3:]))
-            beta=cp.dot(r_new,r_0_star)/cp.dot(r,r_0_star)
+            Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
+            u=r_new+Beta*q
+            p_new=u+Beta*(q+Beta*p)
+            p=p_new
             r=r_new
-            u=r+beta*q
-            p=u+beta*(q+beta*p)
-            norm=cp.linalg.norm(r)
+            norm=abs(cp.max(x_new-x))
+            x=x_new
         x=cp.asnumpy(x)
-        return x
     def Left_Cubic_CGS(self):
         B_1=B_1_Cubic_Left(self.N,self.gamma,self.beta,self.h)
         B_2=B_2_Cubic_Left(self.N,self.gamma,self.beta,self.h)
@@ -263,6 +265,29 @@ class Final_Solution():
             u=r+beta*q
             p=u+beta*(q+beta*p)
             norm=cp.linalg.norm(r)
+        x=cp.asnumpy(x)
+        return x
+    def Test_CGS(self):
+        Stiff=self.stiff.Cubic_Right_Test()
+        B=-Stiff
+        b=self.force.Construct_Right()
+        r_0=cp.ones(shape=self.N)
+        x=cp.zeros(shape=self.N)
+        r=b-cp.matmul(B,x)
+        p,u=r,r
+        norm=5
+        while norm>=1e-6:
+            alpha=cp.dot(r,r_0)/cp.dot(cp.matmul(B,p),r_0)
+            q=u-alpha*(cp.matmul(B,p))
+            x_new=x+alpha*(u+q)
+            r_new=r-alpha*(cp.matmul(B,u+q))
+            Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
+            u=r_new+Beta*q
+            p_new=u+Beta*(q+Beta*p)
+            p=p_new
+            r=r_new
+            norm=abs(cp.max(x_new-x))
+            x=x_new
         x=cp.asnumpy(x)
         return x
     def Steady_State_Linear(self):
@@ -382,6 +407,3 @@ def Fine_Propogator(M,u,u_fine,m,N):
             fSum+=M[col,row,k]*u[k,col]
         u_fine[row,col]=fSum
 
-
-s=Final_Solution(0,1,0,.7,64)
-s.Right_Cubic_CGS()
