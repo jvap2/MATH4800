@@ -22,7 +22,7 @@ def B_1_Cubic_Right_Min(N,beta):
     B_R_Min[0,0]=(2.5**beta)*((-beta**2)/3-beta+(71/6))-(1.5**beta)*((-4*beta**2)/3-4*beta+(46/3))
     B_R_Min[1,0]=(1.5**beta)*((-beta**2)/3-beta+(23/6))-(.5**beta)*((-4*beta**2)/3-4*beta-2/3)
     B_R_Min[2,0]=(.5**beta)*((-beta**2)/3-beta-(1/6))
-    return B_R_Min
+    return aslinearoperator(B_R_Min)
 
 def B_1_Cubic_Right_Plus(N,beta):
     B_R_Plus=cp.zeros(shape=(N,2))  
@@ -31,7 +31,7 @@ def B_1_Cubic_Right_Plus(N,beta):
     B_R_Plus[2,1]=-(.5**beta)*((-beta**2)/3-beta-(1/6))
     B_R_Plus[0,0]=-(1.5**beta)*((-beta**2)/3-beta+(23/6))+(.5**beta)*((-4*beta**2)/3-4*beta-2/3)
     B_R_Plus[1,0]=-(.5**beta)*((-beta**2)/3-beta-(1/6))
-    return B_R_Plus
+    return aslinearoperator(B_R_Plus)
 
 def B_3_Cubic_Right_Min(N,beta):
     j_1=cp.linspace(1,N-2,N-2)
@@ -53,7 +53,7 @@ def B_3_Cubic_Right_Min(N,beta):
     B_R_Min[N-2,0]=-((.5)**beta)*((-4*beta**2)/3-4*beta-2/3)+((2.5)**beta)*((2*beta**2)/3-3*beta+23/6)
     B_R_Min[N-3,0]=(.5**beta)*(-2*(beta**2)-6*beta-1)-(1.5**beta)*((-4*beta**2)/3-4*beta+46/3)+(3.5**beta)*((2*beta**2)/3-5*beta+71/6)
     B_R_Min[N-4,0]=-((.5)**beta)*((-4*beta**2)/3-4*beta-(2/3))+(1.5**beta)*(-2*beta**2-6*beta+23)-(2.5**beta)*((-4*beta**2)/3-4*beta+142/3)+(4.5**beta)*((2*beta**2)/3-7*beta+143/6)
-    return B_R_Min
+    return aslinearoperator(B_R_Min)
 
 
 
@@ -79,7 +79,7 @@ def B_3_Cubic_Right_Plus(N,beta):
     B_R_Plus[N-3,0]=((.5)**beta)*((-4*beta**2)/3-4*beta-2/3)-((2.5)**beta)*((2*beta**2)/3-3*beta+23/6)
     B_R_Plus[N-4,0]=-(.5**beta)*(-2*(beta**2)-6*beta-1)+(1.5**beta)*((-4*beta**2)/3-4*beta+46/3)-(3.5**beta)*((2*beta**2)/3-5*beta+71/6)
     B_R_Plus[N-5,0]=((.5)**beta)*((-4*beta**2)/3-4*beta-(2/3))-(1.5**beta)*(-2*beta**2-6*beta+23)+(2.5**beta)*((-4*beta**2)/3-4*beta+142/3)-(4.5**beta)*((2*beta**2)/3-7*beta+143/6)
-    return B_R_Plus
+    return aslinearoperator(B_R_Plus)
     
 def B_2_Cubic_Right_Plus(N,beta):
     row_plus=cp.zeros(shape=N-5)
@@ -93,7 +93,7 @@ def B_2_Cubic_Right_Plus(N,beta):
     col_plus[2]=(.5**beta)*((-4*beta**2)/3-4*beta-2/3)-(1.5**beta)*((-beta**2)/3-beta+23/6)
     col_plus[3]=(-1)*((.5)**beta)*((-beta**2)/3-beta-1/6)
     B_R_Plus=toeplitz(c=col_plus,r=row_plus)
-    return B_R_Plus
+    return aslinearoperator(B_R_Plus)
 
 
 def B_2_Cubic_Right_Min(N,beta):
@@ -108,4 +108,20 @@ def B_2_Cubic_Right_Min(N,beta):
     col_min[3]=-(.5**beta)*((-4*beta**2)/3-4*beta-2/3)+(1.5**beta)*((-beta**2)/3-beta+23/6)
     col_min[4]=((.5)**beta)*((-beta**2)/3-beta-1/6)
     B_R_Min=toeplitz(c=col_min,r=row_min)
-    return B_R_Min
+    return aslinearoperator(B_R_Min)
+
+
+def K_plus(N,h,gamma,beta,x=0):
+    k_left_non_lin=lambda x: 1+x
+    K_m_ss_nonlin=k_left_non_lin(x)
+    constant=((1-gamma)*(h**(beta-1)))/(2*math.gamma(beta+3))
+    K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
+    return aslinearoperator(K_plus_diag)
+
+
+def K_Min(N,h,gamma,beta,x=0):
+    k_left_non_lin=lambda x: 1+x
+    K_m_ss_nonlin=k_left_non_lin(x)
+    constant=((1-gamma)*(h**(beta-1)))/(2*math.gamma(beta+3))
+    K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
+    return aslinearoperator(K_min_diag)

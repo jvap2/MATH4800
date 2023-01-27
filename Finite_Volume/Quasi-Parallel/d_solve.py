@@ -16,7 +16,7 @@ from numba import cuda
 from numba.cuda import stream
 import d_cgs
 from cupyx.scipy.sparse.linalg import aslinearoperator
-from d_cgs import B_1_Cubic_Right,B_2_Cubic_Right,B_3_Cubic_Right
+from d_cgs import B_1_Cubic_Right_Min,B_2_Cubic_Right_Min,B_3_Cubic_Right_Min, B_1_Cubic_Right_Plus,B_2_Cubic_Right_Plus,B_3_Cubic_Right_Plus, K_Min,K_plus
 
 
 
@@ -224,20 +224,25 @@ class Final_Solution():
         u=cp.linalg.solve(-B,f)
         return cp.asnumpy(u)
     def Lin_Op_Right(self):
-        B_1=B_1_Cubic_Right(self.N,self.gamma,self.beta,self.h,self.mid)
-        B_2=B_2_Cubic_Right(self.N,self.gamma,self.beta,self.h,self.mid)
-        B_3=B_3_Cubic_Right(self.N,self.gamma,self.beta,self.h,self.mid)
+        B_1_P=B_1_Cubic_Right_Plus(self.N,self.beta)
+        B_2_P=B_2_Cubic_Right_Plus(self.N,self.beta)
+        B_3_P=B_3_Cubic_Right_Plus(self.N,self.beta)
+        B_1_M=B_1_Cubic_Right_Min(self.N,self.beta)
+        B_2_M=B_2_Cubic_Right_Min(self.N,self.beta)
+        B_3_M=B_3_Cubic_Right_Min(self.N,self.beta)
+        K_p=K_plus(self.N,self.h,self.gamma,self.beta,self.mid)
+        K_m=K_Min(self.N,self.h,self.gamma,self.beta,self.mid)
         b=self.force.Construct_Right()
         r_0=cp.ones(shape=self.N)
         x=cp.zeros(shape=self.N)
-        r=b-(-B_1.matvec(x[:3])-B_2.matvec(x[2:self.N-3])-B_3.matvec(x[self.N-3:]))
+        r=b-K_p.matvec(B_1_P.matvec(x[:2])+B_2_P.matvec(x[2:self.N-3])+B_3_P.matvec(x[self.N-3:]))-K_m.matvec(B_1_M.matvec(x[:3])+B_2_M.matvec(x[2:self.N-3])+B_3_M.matvec(x[self.N-3:]))
         p,u=r,r
         norm=5
         while norm>=1e-6:
-            alpha=cp.dot(r,r_0)/cp.dot(-B_1.matvec(p[:3])-B_2.matvec(p[2:self.N-3])-B_3.matvec(p[self.N-3:]),r_0)
-            q=u-alpha*(-B_1.matvec(p[:3])-B_2.matvec(p[2:self.N-3])-B_3.matvec(p[self.N-3:]))
+            alpha=cp.dot(r,r_0)/cp.dot(-K_p.matvec(B_1_P.matvec(p[:2])+B_2_P.matvec(p[2:self.N-3])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[2:self.N-3])+B_3_M.matvec(p[self.N-3:])),r_0)
+            q=u-alpha*(-K_p.matvec(B_1_P.matvec(p[:2])+B_2_P.matvec(p[2:self.N-3])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[2:self.N-3])+B_3_M.matvec(p[self.N-3:])))
             x_new=x+alpha*(u+q)
-            r_new=r-alpha*(-B_1.matvec(u[:3]+q[:3])-B_2.matvec(u[2:self.N-3]+q[2:self.N-3])-B_3.matvec(u[self.N-3:]+q[self.N-3:]))
+            r_new=r-alpha*(-K_p.matvec(B_1_P.matvec(u[:2]+q[:2])+B_2_P.matvec(u[2:self.N-3]+q[2:self.N-3])+B_3_P.matvec(u[self.N-3:]+q[self.N-3:]))-K_m.matvec(B_1_M.matvec(u[:3]+q[:3])+B_2_M.matvec(u[2:self.N-3]+q[2:self.N-3])+B_3_M.matvec(u[self.N-3:]+q[self.N-3:])))
             Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
             u=r_new+Beta*q
             p_new=u+Beta*(q+Beta*p)
