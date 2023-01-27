@@ -162,10 +162,39 @@ def B_1_Cubic_Left_Min(N,beta):
 
     
 def B_2_Cubic_Left_Plus(N,beta):
-    pass
+    col_plus=cp.empty(shape=N)
+    row_plus=cp.zeros(shape=N-5)
+    col_linspace=cp.linspace(3,N-4,N-6)
+    col_plus[1]=((.5)**beta)*((-(beta**2)/3)-beta-(1/6))
+    col_plus[2]=((.5)**beta)*((4*(beta**2)/3)+4*beta+(2/3))+((1.5)**beta)*((-(beta**2)/3)-beta+(23/6))
+    col_plus[3]=((2.5)**beta)*((-(beta**2)/3)-beta+(71/6))+((1.5)**beta)*((4*(beta**2)/3)+4*beta-(46/3))+((.5)**beta)*(-2*(beta**2)-6*beta-1)
+    col_plus[4]=((3.5)**beta)*((-(beta**2)/3)-beta+(143/6))+((2.5)**beta)*((4*(beta**2)/3)+4*beta-(142/3))+((1.5)**beta)*(-2*(beta**2)-6*beta+23)+((.5)**beta)*((4*(beta**2)/3)+4*beta+(2/3))
+    col_plus[5]=((4.5)**beta)*((239/6)-((beta**2)/3)-beta)+(2/3)*((3.5)**beta)*(-143+2*(beta**2)+6*beta)+\
+            ((2.5)**beta)*(71-2*(beta**2)-6*beta)+(2/3)*((1.5)**beta)*(-23+2*(beta**2)+6*beta)+\
+            ((.5)**beta)*(-(1/6)-((beta**2)/3)-beta)
+    col_plus[6:]=((col_linspace+2.5)**beta)*(2*(col_linspace**2)+10*col_linspace-(beta**2/3)-beta+(71/6))+(2/3)*((col_linspace+1.5)**beta)*(-12*(col_linspace**2)-36*col_linspace+2*beta**2+6*beta-23)+\
+            ((col_linspace+.5)**beta)*(12*(col_linspace**2)+12*col_linspace-2*beta**2-6*beta-1)+(2/3)*((col_linspace-.5)**beta)*(-12*(col_linspace**2)+12*col_linspace+2*beta**2+6*beta+1)+\
+            ((col_linspace-1.5)**beta)*(2*(col_linspace**2)-6*col_linspace-((beta**2)/3)-beta+(23/6))
+    B_L_Plus=toeplitz(c=col_plus,r=row_plus)
+    return aslinearoperator(B_L_Plus)
+
+
 
 def B_2_Cubic_Left_Min(N,beta):
-    pass
+    row_min=cp.zeros(shape=N-5)
+    col_min=cp.zeros(shape=N)
+    col_linspace=cp.linspace(3,N-4,N-6)
+    col_min[2]=((.5)**beta)*(((beta**2)/3)+beta+(1/6))
+    col_min[3]=((1.5)**beta)*(((beta**2)/3)+beta-(23/6))+((.5)**beta)*((-4*(beta**2)/3)-4*beta-(2/3))
+    col_min[4]=((2.5)**beta)*(((beta**2)/3)+beta-(71/6))+((1.5)**beta)*((-4*(beta**2)/3)-4*beta+(46/3))+((.5)**beta)*(2*(beta**2)+6*beta+1)
+    col_min[5]=((3.5**beta))*(((beta**2)/3)+beta-(143/6))+((2.5)**beta)*((-4*(beta**2)/3)-4*beta+(142/3))+((1.5)**beta)*(2*(beta**2)+6*beta-23)+((.5)**beta)*((-4*(beta**2)/3)-4*beta-(2/3))
+    col_min[3:]=((col_linspace+1.5)**beta)*(-2*(col_linspace**2)-6*col_linspace+((beta**2)/3)+beta-(23/6))+(2/3)*((col_linspace+.5)**beta)*(12*(col_linspace**2)+12*col_linspace-2*(beta**2)-6*beta-1)+\
+            ((col_linspace-.5)**beta)*(-12*(col_linspace**2)+12*col_linspace+2*(beta**2)+6*beta+1)+(2/3)*((col_linspace-1.5)**beta)*(12*(col_linspace**2)-36*col_linspace-2*beta**2-6*beta+23)+\
+            ((col_linspace-2.5)**beta)*(-2*(col_linspace**2)+10*col_linspace+((beta**2)/3)+beta-(71/6))
+    B_L_Min=toeplitz(c=col_min,r=row_min)
+    return aslinearoperator(B_L_Min)
+
+
 
 def B_3_Cubic_Left_Plus(N,beta):
     B_L_Plus=cp.zeros(shape=(N,3))
