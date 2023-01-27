@@ -168,11 +168,28 @@ def B_2_Cubic_Left_Min(N,beta):
     pass
 
 def B_3_Cubic_Left_Plus(N,beta):
-    pass
+    B_L_Plus=cp.zeros(shape=(N,3))
+    B_L_Plus[N-1,2]=((1.5)**beta)*((4/3)*beta**2+4*beta-(46/3))-((2.5)**beta)*((1/3)*beta**2+beta-(71/6))
+    B_L_Plus[N-2,2]=(-1)*(((1.5)**beta)*((1/3)*beta**2+beta-(23/6))-((.5)**beta)*((4/3)*beta**2+4*beta+(2/3)))
+    B_L_Plus[N-3,2]=(-1)*(((.5)**beta)*((1/3)*(beta**2)+beta+(1/6)))
+    B_L_Plus[N-1,1]=-((1.5)**beta)*(2*(beta**2)+6*beta-23)+((2.5)**beta)*((4/3)*(beta**2)+4*beta-(142/3))-\
+        ((3.5)**beta)*((1/3)*(beta**2)+beta-(143/6))
+    B_L_Plus[N-2,1]=(-1)*(((.5)**beta)*(2*(beta**2)+6*beta+1)-((1.5)**beta)*((4/3)*(beta**2)+4*beta-(46/3))+\
+            ((2.5)**beta)*((1/3)*(beta**2)+beta-(71/6)))
+    B_L_Plus[N-3,1]=(-1)*(((1.5)**beta)*((1/3)*(beta**2)+beta-(23/6))-((.5)**beta)*((4/3)*(beta**2)+4*beta+(2/3)))
+    B_L_Plus[N-4,1]=(-1)*(((.5)**beta)*((1/3)*(beta**2)+beta+(1/6)))
+    B_L_Plus[N-1,0]=((3.5)**beta)*(4*(beta**2)/3+4*beta-(286/3))+((1.5)**beta)*(4*(beta**2)/3+4*beta-46/3)-((4.5**beta)*((beta**2)/3+beta-(239/6))+(2.5**beta)*(2*(beta**2)+6*beta-71))
+    return aslinearoperator(B_L_Plus)
 
 def B_3_Cubic_Left_Min(N,beta):
-    pass
-
+    B_L_Min=cp.zeros(shape=(N,2))
+    B_L_Min[N-1,1]=((1.5)**beta)*((1/3)*beta**2+beta-(23/6))-((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))
+    B_L_Min[N-2,1]=((.5)**beta)*((1/3)*(beta**2)+beta+(1/6))
+    B_L_Min[N-1,0]=((.5)**beta)*(2*(beta**2)+6*beta+1)-((1.5)**beta)*((4/3)*(beta**2)+4*beta-(46/3))+\
+        ((2.5)**beta)*((1/3)*(beta**2)+beta-(71/6))
+    B_L_Min[N-2,0]=((1.5)**beta)*((1/3)*(beta**2)+beta-(23/6))-((.5)**beta)*((4/3)*(beta**2)+4*beta+(2/3))
+    B_L_Min[N-3,0]=((.5)**beta)*((1/3)*(beta**2)+beta+(1/6))
+    return aslinearoperator(B_L_Min)
 
 def K_plus(N,h,gamma,beta,x=0):
     k_left_non_lin=lambda x: 1+x
