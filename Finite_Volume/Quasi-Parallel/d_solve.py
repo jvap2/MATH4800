@@ -16,8 +16,9 @@ from numba import cuda
 from numba.cuda import stream
 import d_cgs
 from cupyx.scipy.sparse.linalg import aslinearoperator
-from d_cgs import B_1_Cubic_Right_Min,B_2_Cubic_Right_Min,B_3_Cubic_Right_Min, B_1_Cubic_Right_Plus,B_2_Cubic_Right_Plus,B_3_Cubic_Right_Plus, K_Min,K_plus
+from d_cgs import B_1_Cubic_Right_Min,B_2_Cubic_Right_Min,B_3_Cubic_Right_Min, B_1_Cubic_Right_Plus,B_2_Cubic_Right_Plus,B_3_Cubic_Right_Plus
 from d_cgs import B_1_Cubic_Left_Min, B_1_Cubic_Left_Plus, B_2_Cubic_Left_Min, B_2_Cubic_Left_Plus, B_3_Cubic_Left_Min, B_3_Cubic_Left_Plus
+from d_cgs import K_Min_L,K_Min_R,K_plus_L,K_plus_R
 
 
 
@@ -230,8 +231,8 @@ class Final_Solution():
         B_1_M=B_1_Cubic_Right_Min(self.N,self.beta)
         B_2_M=B_2_Cubic_Right_Min(self.N,self.beta)
         B_3_M=B_3_Cubic_Right_Min(self.N,self.beta)
-        K_p=K_plus(self.N,self.h,self.gamma,self.beta,self.mid)
-        K_m=K_Min(self.N,self.h,self.gamma,self.beta,self.mid)
+        K_p=K_plus_R(self.N,self.h,self.gamma,self.beta,self.mid)
+        K_m=K_Min_R(self.N,self.h,self.gamma,self.beta,self.mid)
         b=self.force.Construct_Right()
         r_0=cp.ones(shape=self.N)
         x=cp.zeros(shape=self.N)
@@ -259,8 +260,8 @@ class Final_Solution():
         B_1_M=B_1_Cubic_Left_Min(self.N,self.beta)
         B_2_M=B_2_Cubic_Left_Min(self.N,self.beta)
         B_3_M=B_3_Cubic_Left_Min(self.N,self.beta)
-        K_p=K_plus(self.N,self.h,self.gamma,self.beta,self.mid)
-        K_m=K_Min(self.N,self.h,self.gamma,self.beta,self.mid)
+        K_p=K_plus_L(self.N,self.h,self.gamma,self.beta,self.mid)
+        K_m=K_Min_L(self.N,self.h,self.gamma,self.beta,self.mid)
         b=self.force.Construct()
         r_0=cp.ones(shape=self.N)
         x=cp.zeros(shape=self.N)

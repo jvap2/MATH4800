@@ -175,6 +175,7 @@ def B_2_Cubic_Left_Plus(N,beta):
     col_plus[6:]=((col_linspace+2.5)**beta)*(2*(col_linspace**2)+10*col_linspace-(beta**2/3)-beta+(71/6))+(2/3)*((col_linspace+1.5)**beta)*(-12*(col_linspace**2)-36*col_linspace+2*beta**2+6*beta-23)+\
             ((col_linspace+.5)**beta)*(12*(col_linspace**2)+12*col_linspace-2*beta**2-6*beta-1)+(2/3)*((col_linspace-.5)**beta)*(-12*(col_linspace**2)+12*col_linspace+2*beta**2+6*beta+1)+\
             ((col_linspace-1.5)**beta)*(2*(col_linspace**2)-6*col_linspace-((beta**2)/3)-beta+(23/6))
+    print(col_linspace)
     B_L_Plus=toeplitz(c=col_plus,r=row_plus)
     return aslinearoperator(B_L_Plus)
 
@@ -191,6 +192,7 @@ def B_2_Cubic_Left_Min(N,beta):
     col_min[6:]=((col_linspace+1.5)**beta)*(-2*(col_linspace**2)-6*col_linspace+((beta**2)/3)+beta-(23/6))+(2/3)*((col_linspace+.5)**beta)*(12*(col_linspace**2)+12*col_linspace-2*(beta**2)-6*beta-1)+\
             ((col_linspace-.5)**beta)*(-12*(col_linspace**2)+12*col_linspace+2*(beta**2)+6*beta+1)+(2/3)*((col_linspace-1.5)**beta)*(12*(col_linspace**2)-36*col_linspace-2*beta**2-6*beta+23)+\
             ((col_linspace-2.5)**beta)*(-2*(col_linspace**2)+10*col_linspace+((beta**2)/3)+beta-(71/6))
+    col_linspace=cp.linspace(3,N-4,N-6)
     B_L_Min=toeplitz(c=col_min,r=row_min)
     return aslinearoperator(B_L_Min)
 
@@ -220,7 +222,7 @@ def B_3_Cubic_Left_Min(N,beta):
     B_L_Min[N-3,0]=((.5)**beta)*((1/3)*(beta**2)+beta+(1/6))
     return aslinearoperator(B_L_Min)
 
-def K_plus(N,h,gamma,beta,x=0):
+def K_plus_R(N,h,gamma,beta,x=0):
     k_left_non_lin=lambda x: 1+x
     K_m_ss_nonlin=k_left_non_lin(x)
     constant=((1-gamma)*(h**(beta-1)))/(2*math.gamma(beta+3))
@@ -228,9 +230,26 @@ def K_plus(N,h,gamma,beta,x=0):
     return aslinearoperator(K_plus_diag)
 
 
-def K_Min(N,h,gamma,beta,x=0):
+def K_Min_R(N,h,gamma,beta,x=0):
     k_left_non_lin=lambda x: 1+x
     K_m_ss_nonlin=k_left_non_lin(x)
     constant=((1-gamma)*(h**(beta-1)))/(2*math.gamma(beta+3))
     K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
     return aslinearoperator(K_min_diag)
+
+
+def K_plus_L(N,h,gamma,beta,x=0):
+    k_left_non_lin=lambda x: 1+x
+    K_m_ss_nonlin=k_left_non_lin(x)
+    constant=(gamma*(h**(beta-1)))/(2*math.gamma(beta+3))
+    K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
+    return aslinearoperator(K_plus_diag)
+
+
+def K_Min_L(N,h,gamma,beta,x=0):
+    k_left_non_lin=lambda x: 1+x
+    K_m_ss_nonlin=k_left_non_lin(x)
+    constant=((gamma)*(h**(beta-1)))/(2*math.gamma(beta+3))
+    K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
+    return aslinearoperator(K_min_diag)
+

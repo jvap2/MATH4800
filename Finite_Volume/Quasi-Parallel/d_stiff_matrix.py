@@ -136,8 +136,8 @@ class StiffMatrix():
         B_L_Plus[self.N-4,self.N-2]=-B_L_Min[self.N-3,self.N-2]
         B_L_Plus[self.N-1,self.N-3]=((3.5)**beta)*(4*(beta**2)/3+4*beta-(286/3))+((1.5)**beta)*(4*(beta**2)/3+4*beta-46/3)-((4.5**beta)*((beta**2)/3+beta-(239/6))+(2.5**beta)*(2*(beta**2)+6*beta-71))
         constant=(self.gamma*(h**(beta-1)))/(2*gamma(beta+3))
-        K_plus_diag=constant*diag(K_m_1[1:],k=0)
-        K_min_diag=constant*diag(K_m_1[:self.N],k=0)
+        K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
+        K_min_diag=constant*diag(K_m_ss_nonlin[:self.N],k=0)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
         return B
 

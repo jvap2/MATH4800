@@ -17,6 +17,7 @@ class Force_Matrix():
         beta=.7
         f=np.zeros(self.N)
         force= lambda x: (-1/gamma(beta+3))*((2*x**beta)*((beta**2)*(x+1)+beta*(-3*x**2+x+3)-9*x**2-2*x+2))
+        # force= lambda x: (-1/gamma(beta+4))*(2*x*(beta*(3*x+2)-12*x**2+6))
         for i in range(self.N):
             f[i],_=integrate.quad(force,self.mid[i],self.mid[i+1])
         f=cp.array(f)
