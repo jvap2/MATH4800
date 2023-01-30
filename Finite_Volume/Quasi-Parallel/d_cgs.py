@@ -162,7 +162,7 @@ def B_1_Cubic_Left_Min(N,beta):
 
     
 def B_2_Cubic_Left_Plus(N,beta):
-    col_plus=cp.empty(shape=N)
+    col_plus=cp.zeros(shape=N)
     row_plus=cp.zeros(shape=N-5)
     col_linspace=cp.linspace(3,N-4,N-6)
     col_plus[1]=((.5)**beta)*((-(beta**2)/3)-beta-(1/6))
