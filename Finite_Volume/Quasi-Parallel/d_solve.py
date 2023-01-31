@@ -268,7 +268,7 @@ class Final_Solution():
         r=b-K_p.matvec(B_1_P.matvec(x[:3])+B_2_P.matvec(x[3:self.N-2])+B_3_P.matvec(x[self.N-3:]))-K_m.matvec(B_1_M.matvec(x[:3])+B_2_M.matvec(x[3:self.N-2])+B_3_M.matvec(x[self.N-2:]))
         p,u=r,r
         norm=5
-        while norm>=1e-6:
+        while norm>=1e-7:
             alpha=cp.dot(r,r_0)/cp.dot(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-2])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])),r_0)
             q=u-alpha*(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-2])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])))
             x_new=x+alpha*(u+q)
