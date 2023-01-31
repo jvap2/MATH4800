@@ -126,12 +126,12 @@ def B_1_Cubic_Left_Plus(N,beta):
     B_L_Plus[1,2]=((.5)**beta)*(4*(beta**2)/3+4*beta+(2/3))-((2.5)**beta)*(-2*(beta**2)/3+3*beta-23/6)
     B_L_Plus[2,2]=((1.5)**beta)*(4*(beta**2)/3+4*beta-(46/3))-((.5**beta)*(2*beta**2+6*beta+1)+(3.5**beta)*(-2*(beta**2)/3+5*beta-(71/6)))
     B_L_Plus[3,2]=((2.5)**beta)*(4*(beta**2)/3+4*beta-(142/3))+((.5)**beta)*(4*(beta**2)/3+4*beta+(2/3))\
-        -((1.5**beta)*(2*(beta**2)+6*beta-23)+(4.5**beta)*(-2*(beta**2)/3+7*beta-(143/6)))
+            -((1.5**beta)*(2*(beta**2)+6*beta-23)+(4.5**beta)*(-2*(beta**2)/3+7*beta-(143/6)))
     B_L_Plus[4:,2]=((j_2-3.5)**beta)*(4*(beta**2)/3+4*beta-8*j_2**2+56*j_2-(286/3))+((j_2-1.5)**beta)*(4*(beta**2)/3+4*beta-8*j_2**2+24*j_2-(46/3))-(((j_2-4.5)**beta)*((beta**2)/3+beta-2*j_2**2+18*j_2-(239/6))+((j_2-2.5)**beta)*(2*beta**2+6*beta-12*j_2**2+60*j_2-71)+((j_2+.5)**beta)*(-2*(beta**2)/3-beta+2*beta*j_2+2*j_2-2*j_2**2+(1/6)))
     B_L_Plus[2:,0]=((j-1.5)**beta)*((4/3)*(beta**2)+4*beta-8*j**2+24*j-(46/3))-((j-2.5)**beta)*((1/3)*(beta**2)+beta-2*j**2+10*j-(71/6))-\
-        ((j+.5)**beta)*(-6*(beta**2)-13*beta+10*beta*j-6*j**2+14*j-3.5)
+            ((j+.5)**beta)*(-6*(beta**2)-13*beta+10*beta*j-6*j**2+14*j-3.5)
     B_L_Plus[3:,1]=-((j_1-3.5)**beta)*((1/3)*(beta**2)+beta-2*(j_1**2)+14*j_1-(143/6))+((j_1-2.5)**beta)*((4/3)*beta**2+4*beta+40*j_1-8*(j_1**2)-(142/3))+\
-        ((j_1+.5)**beta)*(-3*beta**2-5*beta+8*beta*(j_1)+10*j_1-6*(j_1**2)+.5)-((j_1-1.5)**beta)*(2*beta**2+6*beta-12*j_1**2+36*j_1-23)
+            ((j_1+.5)**beta)*(-3*beta**2-5*beta+8*beta*(j_1)+10*j_1-6*(j_1**2)+.5)-((j_1-1.5)**beta)*(2*beta**2+6*beta-12*j_1**2+36*j_1-23)
     return aslinearoperator(B_L_Plus)
     
 
@@ -143,14 +143,14 @@ def B_1_Cubic_Left_Min(N,beta):
     B_L_Min[0,0]=(-1)*((.5)**beta)*(6*(beta**2)+13*beta+3.5)
     B_L_Min[0,1]=((.5)**beta)*((3*beta**2)+5*beta-.5)
     B_L_Min[1,0]=((1.5)**beta)*(-6*(beta**2)-3*beta+4.5)
-    B_L_Min[1,1]=-((1.5)**beta)*(-3*(beta**2)+3*beta+4.5)
-    B_L_Min[2,0]=-((.5)**beta)*((4/3)*(beta**2)+4*beta+(2/3))+((2.5)**beta)*(-6*(beta**2)+7*beta+.5)
-    B_L_Min[2,1]=-((.5)**beta)*(-2*(beta**2)-6*beta-1)+((2.5)**beta)*(3*(beta**2)-11*beta+3.5)
-    B_L_Min[3,1]=-((.5)**beta)*((4/3)*(beta**2)+4*beta+(2/3))+((1.5)**beta)*(2*(beta**2)+6*beta-23)-((3.5)**beta)*(-3*beta**2+19*beta-23.5)
+    B_L_Min[1,1]=(-1)*((1.5)**beta)*(-3*(beta**2)+3*beta+4.5)
+    B_L_Min[2,0]=(-1)*(((.5)**beta)*((4/3)*(beta**2)+4*beta+(2/3))-((2.5)**beta)*(-6*(beta**2)+7*beta+.5))
+    B_L_Min[2,1]=(-1)*(((.5)**beta)*(-2*(beta**2)-6*beta-1)-((2.5)**beta)*(3*(beta**2)-11*beta+3.5))
+    B_L_Min[3,1]=(-1)*(((.5)**beta)*((4/3)*(beta**2)+4*beta+(2/3))-((1.5)**beta)*(2*(beta**2)+6*beta-23)+((3.5)**beta)*(-3*beta**2+19*beta-23.5))
     B_L_Min[0,2]=((.5)**beta)*(-2*(beta**2)/3-beta+(1/6))
     B_L_Min[1,2]=((1.5)**beta)*(-2*(beta**2)/3+beta+(1/6))
-    B_L_Min[2,2]=-((.5)**beta)*(4*(beta**2)/3+4*beta+(2/3))+((2.5)**beta)*(-2*(beta**2)/3+3*beta-23/6)
-    B_L_Min[3,2]=-((1.5)**beta)*(4*(beta**2)/3+4*beta-(46/3))+((.5**beta)*(2*beta**2+6*beta+1)-(3.5**beta)*(-2*(beta**2)/3+5*beta-(71/6)))
+    B_L_Min[2,2]=(-1)*(((.5)**beta)*(4*(beta**2)/3+4*beta+(2/3))-((2.5)**beta)*(-2*(beta**2)/3+3*beta-23/6))
+    B_L_Min[3,2]=(-1)*(((1.5)**beta)*(4*(beta**2)/3+4*beta-(46/3))-((.5**beta)*(2*beta**2+6*beta+1)+(3.5**beta)*(-2*(beta**2)/3+5*beta-(71/6))))
     B_L_Min[4,2]=(-1)*(((2.5)**beta)*(4*(beta**2)/3+4*beta-(142/3))+((.5)**beta)*(4*(beta**2)/3+4*beta+(2/3))\
             -((1.5**beta)*(2*(beta**2)+6*beta-23)+(4.5**beta)*(-2*(beta**2)/3+7*beta-(143/6))))
     B_L_Min[5:,2]=(-1)*(((j_2-3.5)**beta)*(4*(beta**2)/3+4*beta-8*j_2**2+56*j_2-(286/3))+((j_2-1.5)**beta)*(4*(beta**2)/3+4*beta-8*j_2**2+24*j_2-(46/3))-(((j_2-4.5)**beta)*((beta**2)/3+beta-2*j_2**2+18*j_2-(239/6))+((j_2-2.5)**beta)*(2*beta**2+6*beta-12*j_2**2+60*j_2-71)+((j_2+.5)**beta)*(-2*(beta**2)/3-beta+2*beta*j_2+2*j_2-2*j_2**2+(1/6))))
@@ -217,7 +217,7 @@ def B_3_Cubic_Left_Min(N,beta):
     B_L_Min[N-1,1]=((1.5)**beta)*((1/3)*beta**2+beta-(23/6))-((.5)**beta)*((4/3)*beta**2+4*beta+(2/3))
     B_L_Min[N-2,1]=((.5)**beta)*((1/3)*(beta**2)+beta+(1/6))
     B_L_Min[N-1,0]=((.5)**beta)*(2*(beta**2)+6*beta+1)-((1.5)**beta)*((4/3)*(beta**2)+4*beta-(46/3))+\
-        ((2.5)**beta)*((1/3)*(beta**2)+beta-(71/6))
+            ((2.5)**beta)*((1/3)*(beta**2)+beta-(71/6))
     B_L_Min[N-2,0]=((1.5)**beta)*((1/3)*(beta**2)+beta-(23/6))-((.5)**beta)*((4/3)*(beta**2)+4*beta+(2/3))
     B_L_Min[N-3,0]=((.5)**beta)*((1/3)*(beta**2)+beta+(1/6))
     return aslinearoperator(B_L_Min)
