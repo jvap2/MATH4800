@@ -58,16 +58,45 @@ def Right_True_Solution(x_mesh):
     u=u_true(x_mesh)
     return u
 
+def Left_Ex_1(x_mesh):
+    u_true=lambda x: x**5-x**4
+    return u_true(x_mesh)
 
-def Norm_SS(x_vector,y_vector):
+
+def Norm_SS(x_vector,y_approx):
+    int_L2=0
+    int_L2_temp=0
     int_inf=0
     int_inf_temp=0
-    true=True_Solution(x_vector)
-    for i in range(len(x_vector)):
-        int_inf_temp=abs(y_vector[i]-true[i])
+    int_inf_temp_2=0
+    t=1 
+    x_g=np.array([.77459667,0,-.77459667], dtype=np.float64)
+    x_1=((x_vector[1:]-x_vector[:-1])/2)*x_g[0]+(((x_vector[1:]+x_vector[:-1])/2))
+    x_2=((x_vector[1:]-x_vector[:-1])/2)*x_g[1]+(((x_vector[1:]+x_vector[:-1])/2))
+    x_3=((x_vector[1:]-x_vector[:-1])/2)*x_g[2]+(((x_vector[1:]+x_vector[:-1])/2))
+    x=np.zeros(shape=(3,len(x_1)),dtype=np.float64)
+    x[0,:]=x_1
+    x[1,:]=x_2
+    x[2,:]=x_3
+    w_g=np.array([5/9,8/9,5/9], dtype=np.float64)
+    for i in range(len(x_vector)-1):
+        interp_1=interp1d(x_vector[i:i+2].squeeze(),y_approx[i:i+2].squeeze(), kind='linear')
+        for (j,w) in enumerate(w_g):
+            true_int=Left_Ex_1(x[j,i])
+            approx=interp_1(x[j,i])
+            int_L2_temp+=w*((true_int-approx)**2)
+            int_inf_temp_2=abs(true_int-approx)
+            if(int_inf_temp_2>int_inf_temp):
+                int_inf_temp=int_inf_temp_2
+        int_L2+=(int_L2_temp)*(x_vector[i+1]-x_vector[i])/2
+        int_L2_temp=0
         if(int_inf_temp>int_inf):
             int_inf=int_inf_temp
-    return int_inf
+        int_inf_temp=0
+        int_inf_temp_2=0
+        j=0
+    int_L2=math.sqrt(int_L2)
+    return int_L2,int_inf
 
 def Norm_SS_Right(x_vector,y_vector):
     int_inf=0
@@ -77,3 +106,4 @@ def Norm_SS_Right(x_vector,y_vector):
         if(int_inf_temp>int_inf):
             int_inf=int_inf_temp
     return int_inf 
+

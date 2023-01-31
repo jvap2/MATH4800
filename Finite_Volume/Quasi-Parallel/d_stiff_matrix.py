@@ -139,6 +139,7 @@ class StiffMatrix():
         K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
         K_min_diag=constant*diag(K_m_ss_nonlin[:self.N],k=0)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)
+        print("Determinant (B_L):", cp.linalg.det(B))
         return B
 
     def Cubic_Right_Deriv(self):
@@ -322,6 +323,7 @@ class StiffMatrix():
         K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
         K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
         B=cp.matmul(K_plus_diag,B_R_Plus)+cp.matmul(K_min_diag,B_R_Min)
+        print("Determinant (B_R):", cp.linalg.det(B))
         return B
     def Linear_Left_Deriv(self):
         n=cp.linspace(2,self.N-1, self.N-2)

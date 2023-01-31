@@ -30,6 +30,14 @@ class Force_Matrix():
             f[i],_=integrate.quad(force_r,self.mid[i],self.mid[i+1])
         f=cp.array(f)
         return f
+    def Left_Ex_1(self):
+        beta=.6
+        f=np.zeros(self.N)
+        force_r=lambda x: (24*x**(beta+2)/gamma(beta+5))*(beta**2-5*(beta+7)*x**4+(beta+4)*(beta+6)*x**3-5*(beta+4)*x+7*beta+12)
+        for i in range(self.N):
+            f[i],_=integrate.quad(force_r,self.mid[i],self.mid[i+1])
+        f=cp.array(f)
+        return f
     def Construct_Time(self):
         f=cp.zeros(self.N)
         return f
