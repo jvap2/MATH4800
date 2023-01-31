@@ -58,7 +58,7 @@ class StiffMatrix():
         K_m_1=cp.ones(self.N+1)*.01
         K_m=cp.zeros(self.N+1)
         K_m=coeff(x=self.mid[0:self.N+1],t=t)
-        k_left_non_lin=lambda x: 1+x
+        k_left_non_lin=lambda x: 1+x**3
         K_m_ss_nonlin=k_left_non_lin(self.mid[0:])
         col_linspace=cp.linspace(3,self.N-1, self.N-3)
         j=cp.linspace(3,self.N, self.N-2)
@@ -327,7 +327,7 @@ class StiffMatrix():
         return B
     def Linear_Left_Deriv(self):
         n=cp.linspace(2,self.N-1, self.N-2)
-        k_left_non_lin=lambda x: 1+x
+        k_left_non_lin=lambda x: 1+x**3
         K_m_ss=cp.ones(self.N+1)*.01
         K_m_ss_nonlin=k_left_non_lin(self.mesh.midpoints())
         col_plus,row_plus=cp.zeros(shape=(self.N)),cp.zeros(shape=(self.N))
@@ -342,8 +342,8 @@ class StiffMatrix():
         col_plus[2:]=(-2*((n+.5)**self.beta)+((n+1.5)**self.beta)+((n-.5)**self.beta))
         col_min[2:]=(2*((n-.5)**self.beta)-((n+.5)**self.beta)-((n-1.5)**self.beta))
         const=self.gamma/(gamma(self.beta+1)*self.h[0]**(1-self.beta))
-        K_plus_diag=const*diag(K_m_ss[1:],k=0)
-        K_min_diag=const*diag(K_m_ss[:self.N],k=0)
+        K_plus_diag=const*diag(K_m_ss_nonlin[1:],k=0)
+        K_min_diag=const*diag(K_m_ss_nonlin[:self.N],k=0)
         B_L_Plus=toeplitz(c=col_plus,r=row_plus)
         B_L_Min=toeplitz(c=col_min,r=row_min)
         B=cp.matmul(K_plus_diag,B_L_Plus)+cp.matmul(K_min_diag,B_L_Min)

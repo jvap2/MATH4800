@@ -239,7 +239,7 @@ def K_Min_R(N,h,gamma,beta,x=0):
 
 
 def K_plus_L(N,h,gamma,beta,x=0):
-    k_left_non_lin=lambda x: 1+x
+    k_left_non_lin=lambda x: 1+x**3
     K_m_ss_nonlin=k_left_non_lin(x)
     constant=(gamma*(h**(beta-1)))/(2*math.gamma(beta+3))
     K_plus_diag=constant*diag(K_m_ss_nonlin[1:],k=0)
@@ -247,7 +247,7 @@ def K_plus_L(N,h,gamma,beta,x=0):
 
 
 def K_Min_L(N,h,gamma,beta,x=0):
-    k_left_non_lin=lambda x: 1+x
+    k_left_non_lin=lambda x: 1+x**3
     K_m_ss_nonlin=k_left_non_lin(x)
     constant=((gamma)*(h**(beta-1)))/(2*math.gamma(beta+3))
     K_min_diag=constant*diag(K_m_ss_nonlin[:N],k=0)
