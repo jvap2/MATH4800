@@ -70,15 +70,23 @@ def Norm_SS(x_vector,y_approx):
     int_inf_temp=0
     int_inf_temp_2=0
     t=1 
-    x_g=np.array([.77459667,0,-.77459667], dtype=np.float64)
+    # x_g=np.array([.77459667,0,-.77459667], dtype=np.float64)
+    x_g=np.array([-.9324695, -.6612094, -.2386192,.2386192,.6612094, .9324695])
     x_1=((x_vector[1:]-x_vector[:-1])/2)*x_g[0]+(((x_vector[1:]+x_vector[:-1])/2))
     x_2=((x_vector[1:]-x_vector[:-1])/2)*x_g[1]+(((x_vector[1:]+x_vector[:-1])/2))
     x_3=((x_vector[1:]-x_vector[:-1])/2)*x_g[2]+(((x_vector[1:]+x_vector[:-1])/2))
-    x=np.zeros(shape=(3,len(x_1)),dtype=np.float64)
+    x_4=((x_vector[1:]-x_vector[:-1])/2)*x_g[3]+(((x_vector[1:]+x_vector[:-1])/2))
+    x_5=((x_vector[1:]-x_vector[:-1])/2)*x_g[4]+(((x_vector[1:]+x_vector[:-1])/2))
+    x_6=((x_vector[1:]-x_vector[:-1])/2)*x_g[5]+(((x_vector[1:]+x_vector[:-1])/2))
+    x=np.zeros(shape=(6,len(x_1)),dtype=np.float64)
     x[0,:]=x_1
     x[1,:]=x_2
     x[2,:]=x_3
-    w_g=np.array([5/9,8/9,5/9], dtype=np.float64)
+    x[3,:]=x_4
+    x[4,:]=x_5
+    x[5,:]=x_6
+    # w_g=np.array([5/9,8/9,5/9], dtype=np.float64)
+    w_g=np.array([.1713245,.3607616,.4679139,.4679139,.3607616,.1713245], dtype=np.float64)
     for i in range(len(x_vector)-1):
         interp_1=interp1d(x_vector[i:i+2].squeeze(),y_approx[i:i+2].squeeze(), kind='linear')
         for (j,w) in enumerate(w_g):
