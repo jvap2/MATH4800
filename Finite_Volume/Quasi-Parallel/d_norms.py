@@ -62,6 +62,10 @@ def Left_Ex_1(x_mesh):
     u_true=lambda x: x**5-x**4
     return u_true(x_mesh)
 
+def Left_Ex_2(x_mesh):
+    u_true=lambda x: x**(4.12)-x
+    return u_true(x_mesh)
+
 
 def Norm_SS(x_vector,y_approx):
     int_L2=0
@@ -71,26 +75,30 @@ def Norm_SS(x_vector,y_approx):
     int_inf_temp_2=0
     t=1 
     # x_g=np.array([.77459667,0,-.77459667], dtype=np.float64)
-    x_g=np.array([-.9324695, -.6612094, -.2386192,.2386192,.6612094, .9324695])
+    x_g=np.array([-.96028986,-.79666648,-.52553241,-.18343464,.18343464,.52553241,.79666648,.96028986])
     x_1=((x_vector[1:]-x_vector[:-1])/2)*x_g[0]+(((x_vector[1:]+x_vector[:-1])/2))
     x_2=((x_vector[1:]-x_vector[:-1])/2)*x_g[1]+(((x_vector[1:]+x_vector[:-1])/2))
     x_3=((x_vector[1:]-x_vector[:-1])/2)*x_g[2]+(((x_vector[1:]+x_vector[:-1])/2))
     x_4=((x_vector[1:]-x_vector[:-1])/2)*x_g[3]+(((x_vector[1:]+x_vector[:-1])/2))
     x_5=((x_vector[1:]-x_vector[:-1])/2)*x_g[4]+(((x_vector[1:]+x_vector[:-1])/2))
     x_6=((x_vector[1:]-x_vector[:-1])/2)*x_g[5]+(((x_vector[1:]+x_vector[:-1])/2))
-    x=np.zeros(shape=(6,len(x_1)),dtype=np.float64)
+    x_7=((x_vector[1:]-x_vector[:-1])/2)*x_g[6]+(((x_vector[1:]+x_vector[:-1])/2))
+    x_8=((x_vector[1:]-x_vector[:-1])/2)*x_g[7]+(((x_vector[1:]+x_vector[:-1])/2))
+    x=np.zeros(shape=(8,len(x_1)),dtype=np.float64)
     x[0,:]=x_1
     x[1,:]=x_2
     x[2,:]=x_3
     x[3,:]=x_4
     x[4,:]=x_5
     x[5,:]=x_6
+    x[6,:]=x_5
+    x[7,:]=x_6
     # w_g=np.array([5/9,8/9,5/9], dtype=np.float64)
-    w_g=np.array([.1713245,.3607616,.4679139,.4679139,.3607616,.1713245], dtype=np.float64)
+    w_g=np.array([.110122854,.22238103,.31370665,.3626837833,.3626837833,.31370665,.22238103,.110122854], dtype=np.float64)
     for i in range(len(x_vector)-1):
         interp_1=interp1d(x_vector[i:i+2].squeeze(),y_approx[i:i+2].squeeze(), kind='linear')
         for (j,w) in enumerate(w_g):
-            true_int=Left_Ex_1(x[j,i])
+            true_int=Left_Ex_2(x[j,i])
             approx=interp_1(x[j,i])
             int_L2_temp+=w*((true_int-approx)**2)
             int_inf_temp_2=abs(true_int-approx)
