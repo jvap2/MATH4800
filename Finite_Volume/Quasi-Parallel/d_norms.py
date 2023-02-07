@@ -67,13 +67,17 @@ def Left_Ex_2(x_mesh):
     return u_true(x_mesh)
 
 
-def Norm_SS(x_vector,y_approx):
+def Norm_SS(x_vector,y_approx, type):
     int_L2=0
     int_L2_temp=0
     int_inf=0
     int_inf_temp=0
     int_inf_temp_2=0
     t=1 
+    if type=='linear':
+        order=1
+    else:
+        order=3
     # x_g=np.array([.77459667,0,-.77459667], dtype=np.float64)
     x_g=np.array([-.96028986,-.79666648,-.52553241,-.18343464,.18343464,.52553241,.79666648,.96028986])
     x_1=((x_vector[1:]-x_vector[:-1])/2)*x_g[0]+(((x_vector[1:]+x_vector[:-1])/2))
@@ -95,8 +99,8 @@ def Norm_SS(x_vector,y_approx):
     x[7,:]=x_6
     # w_g=np.array([5/9,8/9,5/9], dtype=np.float64)
     w_g=np.array([.110122854,.22238103,.31370665,.3626837833,.3626837833,.31370665,.22238103,.110122854], dtype=np.float64)
-    for i in range(len(x_vector)-1):
-        interp_1=interp1d(x_vector[i:i+2].squeeze(),y_approx[i:i+2].squeeze(), kind='linear')
+    for i in range(len(x_vector)-order):
+        interp_1=interp1d(x_vector[i:i+(order+1)].squeeze(),y_approx[i:i+(order+1)].squeeze(), kind=type)
         for (j,w) in enumerate(w_g):
             true_int=Left_Ex_2(x[j,i])
             approx=interp_1(x[j,i])
@@ -122,4 +126,5 @@ def Norm_SS_Right(x_vector,y_vector):
         if(int_inf_temp>int_inf):
             int_inf=int_inf_temp
     return int_inf 
+
 
