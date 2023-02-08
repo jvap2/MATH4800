@@ -66,6 +66,10 @@ def Left_Ex_2(x_mesh):
     u_true=lambda x: x**(4.12)-x
     return u_true(x_mesh)
 
+def Left_Ex_3(x_mesh):
+    u_true=lambda x: x**(3.63)-x**2
+    return u_true(x_mesh)
+
 
 def Norm_SS(x_vector,y_approx, type):
     int_L2=0
@@ -102,7 +106,7 @@ def Norm_SS(x_vector,y_approx, type):
     for i in range(len(x_vector)-order):
         interp_1=interp1d(x_vector[i:i+(order+1)].squeeze(),y_approx[i:i+(order+1)].squeeze(), kind=type)
         for (j,w) in enumerate(w_g):
-            true_int=Left_Ex_1(x[j,i])
+            true_int=Left_Ex_3(x[j,i])
             approx=interp_1(x[j,i])
             int_L2_temp+=w*((true_int-approx)**2)
             int_inf_temp_2=abs(true_int-approx)

@@ -58,8 +58,8 @@ class StiffMatrix():
         K_m_1=cp.ones(self.N+1)*.01
         K_m=cp.zeros(self.N+1)
         K_m=coeff(x=self.mid[0:self.N+1],t=t)
-        k_left_non_lin=lambda x: 1+x**3
-        # k_left_non_lin=lambda x: 1-x
+        #k_left_non_lin=lambda x: 1+x**3
+        k_left_non_lin=lambda x: (1+x)**2
         K_m_ss_nonlin=k_left_non_lin(self.mid[0:])
         col_linspace=cp.linspace(3,self.N-1, self.N-3)
         j=cp.linspace(3,self.N, self.N-2)
@@ -326,8 +326,8 @@ class StiffMatrix():
         return B
     def Linear_Left_Deriv(self):
         n=cp.linspace(2,self.N-1, self.N-2)
-        k_left_non_lin=lambda x: 1+x**3
-        # k_left_non_lin=lambda x: 1-x
+        # k_left_non_lin=lambda x: 1+x**3
+        k_left_non_lin=lambda x: (1+x)**2
         K_m_ss=cp.ones(self.N+1)*.01
         K_m_ss_nonlin=k_left_non_lin(self.mesh.midpoints())
         col_plus,row_plus=cp.zeros(shape=(self.N)),cp.zeros(shape=(self.N))
