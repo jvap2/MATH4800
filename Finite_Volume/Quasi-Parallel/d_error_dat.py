@@ -5,7 +5,7 @@ import pandas as pd
 
 columns=[]
 info={}
-with open('error.txt') as f:
+with open('ex_3.txt') as f:
     for (i,lines) in enumerate(f.readlines()):
         if i==0:
             columns = [item.strip() for item in lines.split(' ')]
