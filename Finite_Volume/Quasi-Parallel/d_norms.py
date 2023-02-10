@@ -2,7 +2,7 @@ from turtle import shape
 import numpy as np
 import math
 from scipy.interpolate import interp1d
-from scipy.integrate import quad
+from scipy.integrate import quad, trapezoid
 from scipy.interpolate import CubicSpline
 
 def Norm_Time(x_vector,y_approx):
@@ -152,6 +152,8 @@ def CompTrad_Err_ThirdOrder(x_vector, y_approx):
             y_inter_3=lambda x: (y_approx[i+2]/6)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i-1])
             y_est=y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)
             y_true=Left_Ex_3(x_sample)
+            eval_L_2=(y_est-y_true)**2
+            eval_L_inf=np.max(np.abs(y_true-y_est))
         elif i>=2 and i<len(x_vector)-2:
             x_sample=np.linspace(x_vector[i], x_vector[i+1],6)
             y_inter_0=lambda x: (-y_approx[i-1]/6)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i+2])
@@ -160,6 +162,8 @@ def CompTrad_Err_ThirdOrder(x_vector, y_approx):
             y_inter_3=lambda x: (y_approx[i+2]/6)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i-1])
             y_est=y_inter_0(x_sample)+y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)
             y_true=Left_Ex_3(x_sample)
+            eval_L_2=(y_est-y_true)**2
+            eval_L_inf=np.max(np.abs(y_true-y_est))
         else:
             x_sample=np.linspace(x_vector[i], x_vector[i+1],6)
             y_inter_1=lambda x: (-y_approx[i-1]/6)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i+2])
@@ -167,5 +171,15 @@ def CompTrad_Err_ThirdOrder(x_vector, y_approx):
             y_inter_3=lambda x: (y_approx[i]/2)*(x-x_vector[i+2])*(x-x_vector[i+1])*(x-x_vector[i-1])
             y_est=y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)
             y_true=Left_Ex_3(x_sample)
+            eval_L_2=(y_est-y_true)**2
+            eval_L_inf=np.max(np.abs(y_true-y_est))
+        int_L_2+=trapezoid(eval_L_2,x_sample)
+        int_inf_temp=eval_L_inf
+        if int_inf_temp>int_inf:
+            int_inf=int_inf_temp
+    int_L_2=math.sqrt(int_L_2)
+    return int_L_2, int_inf
+
+        
 
 
