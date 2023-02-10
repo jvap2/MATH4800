@@ -132,3 +132,40 @@ def Norm_SS_Right(x_vector,y_vector):
     return int_inf 
 
 
+def CompTrad_Err_ThirdOrder(x_vector, y_approx):
+    int_L2=0
+    int_L2_temp=0
+    int_inf=0
+    int_inf_temp=0
+    int_inf_temp_2=0
+    t=1 
+    y_est=np.empty(shape=4)
+    y_true=np.empty
+    int_L_2=0
+    int_inf_temp=0
+    int_inf=0
+    for i in range(1,len(x_vector)-1):
+        if i==1:
+            x_sample=np.linspace(x_vector[i], x_vector[i+1],6)
+            y_inter_1=lambda x: (y_approx[i]/2)*(x-x_vector[i-1])*(x-x_vector[i+1])*(x-x_vector[i+2])
+            y_inter_2=lambda x: (-y_approx[i+1]/2)*(x-x_vector[i-1])*(x-x_vector[i])*(x-x_vector[i+2])
+            y_inter_3=lambda x: (y_approx[i+2]/6)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i-1])
+            y_est=y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)
+            y_true=Left_Ex_3(x_sample)
+        elif i>=2 and i<len(x_vector)-2:
+            x_sample=np.linspace(x_vector[i], x_vector[i+1],6)
+            y_inter_0=lambda x: (-y_approx[i-1]/6)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i+2])
+            y_inter_1=lambda x: (y_approx[i]/2)*(x-x_vector[i-1])*(x-x_vector[i+1])*(x-x_vector[i+2])
+            y_inter_2=lambda x: (-y_approx[i+1]/2)*(x-x_vector[i-1])*(x-x_vector[i])*(x-x_vector[i+2])
+            y_inter_3=lambda x: (y_approx[i+2]/6)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i-1])
+            y_est=y_inter_0(x_sample)+y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)
+            y_true=Left_Ex_3(x_sample)
+        else:
+            x_sample=np.linspace(x_vector[i], x_vector[i+1],6)
+            y_inter_1=lambda x: (-y_approx[i-1]/6)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i+2])
+            y_inter_2=lambda x: (-y_approx[i+1]/2)*(x-x_vector[i-1])*(x-x_vector[i])*(x-x_vector[i+2])
+            y_inter_3=lambda x: (y_approx[i]/2)*(x-x_vector[i+2])*(x-x_vector[i+1])*(x-x_vector[i-1])
+            y_est=y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)
+            y_true=Left_Ex_3(x_sample)
+
+

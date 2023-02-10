@@ -5,7 +5,7 @@ import pandas as pd
 
 columns=[]
 info={}
-with open('ex_3.txt') as f:
+with open('error.txt') as f:
     for (i,lines) in enumerate(f.readlines()):
         if i==0:
             columns = [item.strip() for item in lines.split(' ')]
@@ -15,11 +15,11 @@ with open('ex_3.txt') as f:
             for d,c in zip(data,columns):
                 df.loc[i,c]=d
 
-h=np.log10(df['h'].to_numpy(dtype=np.float64))
-L2C=np.log10(df['L_2_Cubic'].to_numpy(dtype=np.float64))
-LinfC=np.log10(df['L_inf_Cubic'].to_numpy(dtype=np.float64))
-L2L=np.log10(df['L_2_Linear'].to_numpy(dtype=np.float64))
-LinfL=np.log10(df['L_inf_Linear'].to_numpy(dtype=np.float64))
+h=np.log10(df['h'].to_numpy(dtype=np.float64)[:-1])
+L2C=np.log10(df['L_2_Cubic'].to_numpy(dtype=np.float64)[:-1])
+LinfC=np.log10(df['L_inf_Cubic'].to_numpy(dtype=np.float64)[:-1])
+L2L=np.log10(df['L_2_Linear'].to_numpy(dtype=np.float64)[:-1])
+LinfL=np.log10(df['L_inf_Linear'].to_numpy(dtype=np.float64)[:-1])
 
 
 def estimate_coef(x, y):
