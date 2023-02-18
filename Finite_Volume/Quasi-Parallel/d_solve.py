@@ -236,21 +236,24 @@ class Final_Solution():
         b=self.force.Construct_Right()
         r_0=cp.ones(shape=self.N)
         x=cp.zeros(shape=self.N)
-        r=b-K_p.matvec(B_1_P.matvec(x[:2])+B_2_P.matvec(x[2:self.N-3])+B_3_P.matvec(x[self.N-3:]))-K_m.matvec(B_1_M.matvec(x[:3])+B_2_M.matvec(x[2:self.N-3])+B_3_M.matvec(x[self.N-3:]))
-        p,u=r,r
-        norm=5
-        while norm>=1e-6:
-            alpha=cp.dot(r,r_0)/cp.dot(-K_p.matvec(B_1_P.matvec(p[:2])+B_2_P.matvec(p[2:self.N-3])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[2:self.N-3])+B_3_M.matvec(p[self.N-3:])),r_0)
-            q=u-alpha*(-K_p.matvec(B_1_P.matvec(p[:2])+B_2_P.matvec(p[2:self.N-3])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[2:self.N-3])+B_3_M.matvec(p[self.N-3:])))
-            x_new=x+alpha*(u+q)
-            r_new=r-alpha*(-K_p.matvec(B_1_P.matvec(u[:2]+q[:2])+B_2_P.matvec(u[2:self.N-3]+q[2:self.N-3])+B_3_P.matvec(u[self.N-3:]+q[self.N-3:]))-K_m.matvec(B_1_M.matvec(u[:3]+q[:3])+B_2_M.matvec(u[2:self.N-3]+q[2:self.N-3])+B_3_M.matvec(u[self.N-3:]+q[self.N-3:])))
-            Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
-            u=r_new+Beta*q
-            p_new=u+Beta*(q+Beta*p)
-            p=p_new
-            r=r_new
-            norm=abs(cp.max(x_new-x))
-            x=x_new
+        A=K_p.matvec(B_1_P.matvec(x[:2])+B_2_P.matvec(x[2:self.N-3])+B_3_P.matvec(x[self.N-3:]))-K_m.matvec(B_1_M.matvec(x[:3])+B_2_M.matvec(x[2:self.N-3])+B_3_M.matvec(x[self.N-3:]))
+        x,exit_code=linalg.cgs(A,b)
+        if exit_code!=0:
+            print("Unable to converge")
+        # p,u=r,r
+        # norm=5
+        # while norm>=1e-6:
+        #     alpha=cp.dot(r,r_0)/cp.dot(-K_p.matvec(B_1_P.matvec(p[:2])+B_2_P.matvec(p[2:self.N-3])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[2:self.N-3])+B_3_M.matvec(p[self.N-3:])),r_0)
+        #     q=u-alpha*(-K_p.matvec(B_1_P.matvec(p[:2])+B_2_P.matvec(p[2:self.N-3])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[2:self.N-3])+B_3_M.matvec(p[self.N-3:])))
+        #     x_new=x+alpha*(u+q)
+        #     r_new=r-alpha*(-K_p.matvec(B_1_P.matvec(u[:2]+q[:2])+B_2_P.matvec(u[2:self.N-3]+q[2:self.N-3])+B_3_P.matvec(u[self.N-3:]+q[self.N-3:]))-K_m.matvec(B_1_M.matvec(u[:3]+q[:3])+B_2_M.matvec(u[2:self.N-3]+q[2:self.N-3])+B_3_M.matvec(u[self.N-3:]+q[self.N-3:])))
+        #     Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
+        #     u=r_new+Beta*q
+        #     p_new=u+Beta*(q+Beta*p)
+        #     p=p_new
+        #     r=r_new
+        #     norm=abs(cp.max(x_new-x))
+        #     x=x_new
         x=cp.asnumpy(x)
         return x
     def Lin_Op_Left(self):
@@ -265,21 +268,23 @@ class Final_Solution():
         b=self.force.Left_Ex_1()
         r_0=cp.ones(shape=self.N)
         x=cp.zeros(shape=self.N)
-        r=b-K_p.matvec(B_1_P.matvec(x[:3])+B_2_P.matvec(x[3:self.N-2])+B_3_P.matvec(x[self.N-3:]))-K_m.matvec(B_1_M.matvec(x[:3])+B_2_M.matvec(x[3:self.N-2])+B_3_M.matvec(x[self.N-2:]))
-        p,u=r,r
-        norm=5
-        while norm>=1e-8:
-            alpha=cp.dot(r,r_0)/cp.dot(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-2])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])),r_0)
-            q=u-alpha*(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-2])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])))
-            x_new=x+alpha*(u+q)
-            r_new=r-alpha*(-K_p.matvec(B_1_P.matvec(u[:3]+q[:3])+B_2_P.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3_P.matvec(u[self.N-3:]+q[self.N-3:]))-K_m.matvec(B_1_M.matvec(u[:3]+q[:3])+B_2_M.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3_M.matvec(u[self.N-2:]+q[self.N-2:])))
-            Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
-            u=r_new+Beta*q
-            p_new=u+Beta*(q+Beta*p)
-            p=p_new
-            r=r_new
-            norm=abs(cp.max(x_new-x))
-            x=x_new
+        A=K_p.matvec(B_1_P.matvec(x[:3])+B_2_P.matvec(x[3:self.N-2])+B_3_P.matvec(x[self.N-3:]))-K_m.matvec(B_1_M.matvec(x[:3])+B_2_M.matvec(x[3:self.N-2])+B_3_M.matvec(x[self.N-2:]))
+        x,exit_code=linalg.cgs(A,b)
+        if exit_code!=0:
+            print("Unable to converge")
+        # norm=5
+        # while norm>=1e-8:
+        #     alpha=cp.dot(r,r_0)/cp.dot(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-2])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])),r_0)
+        #     q=u-alpha*(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-2])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])))
+        #     x_new=x+alpha*(u+q)
+        #     r_new=r-alpha*(-K_p.matvec(B_1_P.matvec(u[:3]+q[:3])+B_2_P.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3_P.matvec(u[self.N-3:]+q[self.N-3:]))-K_m.matvec(B_1_M.matvec(u[:3]+q[:3])+B_2_M.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3_M.matvec(u[self.N-2:]+q[self.N-2:])))
+        #     Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
+        #     u=r_new+Beta*q
+        #     p_new=u+Beta*(q+Beta*p)
+        #     p=p_new
+        #     r=r_new
+        #     norm=abs(cp.max(x_new-x))
+        #     x=x_new
         x=cp.asnumpy(x)
         return x
     def Test_CGS(self):
