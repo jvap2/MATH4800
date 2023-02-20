@@ -214,7 +214,7 @@ class Final_Solution():
         print(f"Total_bytes after: {mempool.total_bytes()}")
         return u_return,time_total
     def Steady_State_Cubic_Test(self):
-        B=self.stiff.Cubic_Left_Deriv()
+        B=self.stiff.Mem_Effic_B_Left()
         f=self.force.Left_Ex_3()
         u=cp.linalg.solve(-B,f)
         print(u)
