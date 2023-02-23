@@ -19,6 +19,7 @@ from cupyx.scipy.sparse.linalg import aslinearoperator
 from d_cgs import B_1_Cubic_Right_Min,B_2_Cubic_Right_Min,B_3_Cubic_Right_Min, B_1_Cubic_Right_Plus,B_2_Cubic_Right_Plus,B_3_Cubic_Right_Plus
 from d_cgs import B_1_Cubic_Left_Min, B_1_Cubic_Left_Plus, B_2_Cubic_Left_Min, B_2_Cubic_Left_Plus, B_3_Cubic_Left_Min, B_3_Cubic_Left_Plus
 from d_cgs import K_Min_L,K_Min_R,K_plus_L,K_plus_R
+from d_cgs import Mem_Eff_Lin_Op_Left
 
 
 
@@ -257,34 +258,32 @@ class Final_Solution():
         x=cp.asnumpy(x)
         return x
     def Lin_Op_Left(self):
-        B_1_P=B_1_Cubic_Left_Plus(self.N,self.beta)
-        B_2_P=B_2_Cubic_Left_Plus(self.N,self.beta)
-        B_3_P=B_3_Cubic_Left_Plus(self.N,self.beta)
-        B_1_M=B_1_Cubic_Left_Min(self.N,self.beta)
-        B_2_M=B_2_Cubic_Left_Min(self.N,self.beta)
-        B_3_M=B_3_Cubic_Left_Min(self.N,self.beta)
+        B_1_P, B_1_M, B_2_P,B_2_M, B_3_P, B_3_M=Mem_Eff_Lin_Op_Left(self.N,self.beta,self.h)
         K_p=K_plus_L(self.N,self.h,self.gamma,self.beta,self.mid)
         K_m=K_Min_L(self.N,self.h,self.gamma,self.beta,self.mid)
-        b=self.force.Left_Ex_1()
+        b=self.force.Left_Ex_3()
         r_0=cp.ones(shape=self.N)
         x=cp.zeros(shape=self.N)
-        A=K_p.matvec(B_1_P.matvec(x[:3])+B_2_P.matvec(x[3:self.N-2])+B_3_P.matvec(x[self.N-3:]))-K_m.matvec(B_1_M.matvec(x[:3])+B_2_M.matvec(x[3:self.N-2])+B_3_M.matvec(x[self.N-2:]))
-        x,exit_code=linalg.cgs(A,b)
-        if exit_code!=0:
-            print("Unable to converge")
-        # norm=5
-        # while norm>=1e-8:
-        #     alpha=cp.dot(r,r_0)/cp.dot(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-2])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])),r_0)
-        #     q=u-alpha*(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-2])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])))
-        #     x_new=x+alpha*(u+q)
-        #     r_new=r-alpha*(-K_p.matvec(B_1_P.matvec(u[:3]+q[:3])+B_2_P.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3_P.matvec(u[self.N-3:]+q[self.N-3:]))-K_m.matvec(B_1_M.matvec(u[:3]+q[:3])+B_2_M.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3_M.matvec(u[self.N-2:]+q[self.N-2:])))
-        #     Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
-        #     u=r_new+Beta*q
-        #     p_new=u+Beta*(q+Beta*p)
-        #     p=p_new
-        #     r=r_new
-        #     norm=abs(cp.max(x_new-x))
-        #     x=x_new
+        A=K_p.matvec(B_1_P.matvec(x[:3])+B_2_P.matvec(x[3:self.N-3])+B_3_P.matvec(x[self.N-3:]))-K_m.matvec(B_1_M.matvec(x[:3])+B_2_M.matvec(x[3:self.N-2])+B_3_M.matvec(x[self.N-2:]))
+        print(cp.shape(A))
+        # x,exit_code=linalg.cgs(A,b)
+        # if exit_code!=0:
+        #     print("Unable to converge")
+        norm=5
+        r=b-A
+        p,u=r,r
+        while norm>=1e-8:
+            alpha=cp.dot(r,r_0)/cp.dot(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-3])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])),r_0)
+            q=u-alpha*(-K_p.matvec(B_1_P.matvec(p[:3])+B_2_P.matvec(p[3:self.N-3])+B_3_P.matvec(p[self.N-3:]))-K_m.matvec(B_1_M.matvec(p[:3])+B_2_M.matvec(p[3:self.N-2])+B_3_M.matvec(p[self.N-2:])))
+            x_new=x+alpha*(u+q)
+            r_new=r-alpha*(-K_p.matvec(B_1_P.matvec(u[:3]+q[:3])+B_2_P.matvec(u[3:self.N-3]+q[3:self.N-3])+B_3_P.matvec(u[self.N-3:]+q[self.N-3:]))-K_m.matvec(B_1_M.matvec(u[:3]+q[:3])+B_2_M.matvec(u[3:self.N-2]+q[3:self.N-2])+B_3_M.matvec(u[self.N-2:]+q[self.N-2:])))
+            Beta=cp.dot(r_new,r_0)/cp.dot(r,r_0)
+            u=r_new+Beta*q
+            p_new=u+Beta*(q+Beta*p)
+            p=p_new
+            r=r_new
+            norm=abs(cp.max(x_new-x))
+            x=x_new
         x=cp.asnumpy(x)
         return x
     def Test_CGS(self):

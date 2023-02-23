@@ -436,6 +436,3 @@ class StiffMatrix():
 
 
 
-S=StiffMatrix(0,1,9,0,.6)
-print("Test")
-S.Cubic_Right_Test(),
