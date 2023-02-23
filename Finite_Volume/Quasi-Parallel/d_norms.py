@@ -136,35 +136,35 @@ def CompTrad_Err_ThirdOrder(x_vector, y_approx):
     int_L_2=0
     int_inf_temp=0
     int_inf=0
-    for i in range(1,len(x_vector)-2):
+    inv_h=1/((x_vector[1]-x_vector[0])**3)
+    for i in range(len(x_vector)-1):
         if i<2:
-            x_sample=np.linspace(x_vector[i], x_vector[i+1],20)
-            y_inter_0=lambda x: (y_approx[0]/2)*(x-x_vector[1])*(x-x_vector[2])*(x-x_vector[3])
-            y_inter_1=lambda x: (y_approx[1]/2)*(x-x_vector[0])*(x-x_vector[2])*(x-x_vector[3])
-            y_inter_2=lambda x: (-y_approx[2]/2)*(x-x_vector[0])*(x-x_vector[1])*(x-x_vector[3])
-            y_inter_3=lambda x: (y_approx[3]/6)*(x-x_vector[1])*(x-x_vector[2])*(x-x_vector[0])
-            y_est=y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)
-            print(y_est)
+            x_sample=np.linspace(x_vector[i], x_vector[i+1],2000)
+            y_inter_0=lambda x: (-y_approx[0]/6)*(x-x_vector[1])*(x-x_vector[2])*(x-x_vector[3])*inv_h
+            y_inter_1=lambda x: (y_approx[1]/2)*(x-x_vector[0])*(x-x_vector[2])*(x-x_vector[3])*inv_h
+            y_inter_2=lambda x: (-y_approx[2]/2)*(x-x_vector[0])*(x-x_vector[1])*(x-x_vector[3])*inv_h
+            y_inter_3=lambda x: (y_approx[3]/6)*(x-x_vector[1])*(x-x_vector[2])*(x-x_vector[0])*inv_h
+            y_est=y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)+y_inter_0(x_sample)
             y_true=Left_Ex_3(x_sample)
-            print(y_true)
             eval_L_2=(y_est-y_true)**2
             eval_L_inf=np.max(np.abs(y_true-y_est))
         elif i>=2 and i<len(x_vector)-2:
-            x_sample=np.linspace(x_vector[i], x_vector[i+1],20)
-            y_inter_0=lambda x: (-y_approx[i-2]/6)*(x-x_vector[i-1])*(x-x_vector[i+1])*(x-x_vector[i])
-            y_inter_1=lambda x: (y_approx[i-1]/2)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i-2])
-            y_inter_2=lambda x: (-y_approx[i]/2)*(x-x_vector[i-1])*(x-x_vector[i-2])*(x-x_vector[i-1])
-            y_inter_3=lambda x: (y_approx[i+1]/6)*(x-x_vector[i])*(x-x_vector[i-1])*(x-x_vector[i-2])
+            x_sample=np.linspace(x_vector[i], x_vector[i+1],2000)
+            y_inter_0=lambda x: (-y_approx[i-2]/6)*(x-x_vector[i-1])*(x-x_vector[i+1])*(x-x_vector[i])*inv_h
+            y_inter_1=lambda x: (y_approx[i-1]/2)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i-2])*inv_h
+            y_inter_2=lambda x: (-y_approx[i]/2)*(x-x_vector[i-1])*(x-x_vector[i-2])*(x-x_vector[i+1])*inv_h
+            y_inter_3=lambda x: (y_approx[i+1]/6)*(x-x_vector[i])*(x-x_vector[i-1])*(x-x_vector[i-2])*inv_h
             y_est=y_inter_0(x_sample)+y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)
             y_true=Left_Ex_3(x_sample)
             eval_L_2=(y_est-y_true)**2
             eval_L_inf=np.max(np.abs(y_true-y_est))
         else:
-            x_sample=np.linspace(x_vector[i], x_vector[i+1],20)
-            y_inter_1=lambda x: (-y_approx[i-2]/6)*(x-x_vector[i-1])*(x-x_vector[i+1])*(x-x_vector[i])
-            y_inter_2=lambda x: (y_approx[i-1]/2)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i-2])
-            y_inter_3=lambda x: (-y_approx[i]/2)*(x-x_vector[i-1])*(x-x_vector[i-2])*(x-x_vector[i-1])
-            y_est=y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_3(x_sample)
+            x_sample=np.linspace(x_vector[i], x_vector[i+1],2000)
+            y_inter_0=lambda x: (-y_approx[i-2]/6)*(x-x_vector[i-1])*(x-x_vector[i+1])*(x-x_vector[i])*inv_h
+            y_inter_1=lambda x: (y_approx[i-1]/2)*(x-x_vector[i])*(x-x_vector[i+1])*(x-x_vector[i-2])*inv_h
+            y_inter_2=lambda x: (-y_approx[i]/2)*(x-x_vector[i-1])*(x-x_vector[i-2])*(x-x_vector[i+1])*inv_h
+            y_inter_3=lambda x: (y_approx[i+1]/6)*(x-x_vector[i])*(x-x_vector[i-1])*(x-x_vector[i-2])*inv_h
+            y_est=y_inter_1(x_sample)+y_inter_2(x_sample)+y_inter_0(x_sample)
             y_true=Left_Ex_3(x_sample)
             eval_L_2=(y_est-y_true)**2
             eval_L_inf=np.max(np.abs(y_true-y_est))
