@@ -9,6 +9,7 @@ from cupyx.scipy.sparse.linalg import LinearOperator
 from d_mesh import Mesh
 
 
+
 class StiffMatrix():
     def __init__(self,a,b,N,gamma,beta,t_0=0,t_m=0,M=0):
         self.mesh=Mesh(a,b,N,t_0,t_m,M)
@@ -18,6 +19,8 @@ class StiffMatrix():
         self.x=self.mesh.mesh_points()
         self.mid=self.mesh.midpoints()
         self.h=self.mesh.silengths()
+        self.a=a
+        self.b=b
     def BL(self):
         col_linspace=cp.linspace(-2,1-self.N,self.N-2)
         row_linspace=cp.linspace(2,self.N-1, self.N-2)
@@ -433,6 +436,20 @@ class StiffMatrix():
         K_min_diag=constant*diag(K_m_ss_nonlin[:self.N],k=0)
         B=-cp.matmul(K_plus_diag,B_L_Min[1:,:])+cp.matmul(K_min_diag,B_L_Min[:-1,:])
         return B
+    def Gen_Left_Cub(self):
+        B=cp.empty(self.N+1,self.N+2)
+        B[1:,1:]=self.Mem_Effic_B_Left()
+        kappa = lambda x: 1+0*x
+        kappa_prime = lambda x: 0*x
+        K=kappa(self.mid)
+        K_P=kappa_prime(self.mid)
+        inv_kap_diff=(1/K[1:])-(1/K[:-1])
+        kap_diff=(K[:-1]-K[1:])
+        point_num=self.N+1
+
+
+
+
 
 
 
